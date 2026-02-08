@@ -1,0 +1,56 @@
+name: Deactivate DT Project Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      projectName:
+        description: "DT Project Name"
+        required: true
+        default: "log4j-vulnerable-sample"
+      projectVersion:
+        description: "Project Version to deactivate"
+        required: true
+        default: "1.0.0"
+
+permissions:
+  contents: none
+
+jobs:
+  deactivate:
+    runs-on: ubuntu-latest
+    env:
+      DT_BASE_URL: ${{ secrets.DT_BASE_URL }}
+      DT_API_KEY:  ${{ secrets.DT_API_KEY }}
+
+    steps:
+      - name: Install jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Lookup project UUID
+        id: lookup
+        run: |
+          PN="${{ inputs.projectName }}"
+          PV="${{ inputs.projectVersion }}"
+
+          UUID=$(curl -sS \
+            "$DT_BASE_URL/v1/project/lookup?name=$(printf %s "$PN" | jq -sRr @uri)&version=$(printf %s "$PV" | jq -sRr @uri)" \
+            -H "X-Api-Key: $DT_API_KEY" | jq -r '.uuid // empty')
+
+          if [ -z "$UUID" ]; then
+            echo "Project not found: $PN:$PV" >&2
+            exit 1
+          fi
+
+          echo "uuid=$UUID" >> $GITHUB_OUTPUT
+          echo "Found UUID: $UUID"
+
+      - name: Set project inactive
+        run: |
+          curl -sS -X PATCH "$DT_BASE_URL/v1/project/${{ steps.lookup.outputs.uuid }}" \
+            -H "X-Api-Key: $DT_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"active": false}'
+
+          echo "✅ Deactivated ${{ inputs.projectName }}:${{ inputs.projectVersion }}"

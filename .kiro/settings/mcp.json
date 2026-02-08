@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "Serena": {
+      "command": "bash",
+      "args": [
+        "-lc",
+        "cd ~/serena && uv run serena start-mcp-server --context ide-assistant"
+      ],
+      "disabled": false,
+      "autoApprove": [
+        "*"
+      ]
+    },
+    "Context7": {
+      "command": "bash",
+      "args": [
+        "-lc",
+        "npx -y @upstash/context7-mcp --api-key ctx7sk-5b6db316-f330-4fcf-bedf-4c22d957404f"
+      ],
+      "disabled": false,
+      "autoApprove": [
+        "*"
+      ]
+    }
+  }
+}

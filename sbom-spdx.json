@@ -1,0 +1,66 @@
+SPDXVersion: SPDX-2.3
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+DocumentName: /work
+DocumentNamespace: http://trivy.dev/repository//work-6e055b37-9fac-4136-915c-9eec355b3f5d
+Creator: Organization: aquasecurity
+Creator: Tool: trivy-0.68.2
+Created: 2026-02-02T10:42:49Z
+
+##### Package: pom.xml
+
+PackageName: pom.xml
+SPDXID: SPDXRef-Application-157bf9114c968510
+PackageDownloadLocation: git+/work
+PrimaryPackagePurpose: APPLICATION
+FilesAnalyzed: false
+
+##### Package: log4j:log4j
+
+PackageName: log4j:log4j
+SPDXID: SPDXRef-Package-130ffcfe7a758933
+PackageVersion: 1.2.17
+PackageSupplier: NOASSERTION
+PackageDownloadLocation: git+/work
+PrimaryPackagePurpose: LIBRARY
+FilesAnalyzed: false
+PackageSourceInfo: package found in: pom.xml
+PackageLicenseConcluded: Apache-2.0
+PackageLicenseDeclared: Apache-2.0
+ExternalRef: PACKAGE-MANAGER purl pkg:maven/log4j/log4j@1.2.17
+ExternalRef: SECURITY advisory https://avd.aquasec.com/nvd/cve-2019-17571
+ExternalRef: SECURITY advisory https://avd.aquasec.com/nvd/cve-2022-23305
+ExternalRef: SECURITY advisory https://avd.aquasec.com/nvd/cve-2022-23307
+ExternalRef: SECURITY advisory https://avd.aquasec.com/nvd/cve-2021-4104
+ExternalRef: SECURITY advisory https://avd.aquasec.com/nvd/cve-2022-23302
+ExternalRef: SECURITY advisory https://avd.aquasec.com/nvd/cve-2023-26464
+
+##### Package: com.example:log4j-vulnerable-sample
+
+PackageName: com.example:log4j-vulnerable-sample
+SPDXID: SPDXRef-Package-afb4a9838a1d7d94
+PackageVersion: 1.0.1
+PackageSupplier: NOASSERTION
+PackageDownloadLocation: git+/work
+PrimaryPackagePurpose: LIBRARY
+FilesAnalyzed: false
+PackageSourceInfo: package found in: pom.xml
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: NOASSERTION
+ExternalRef: PACKAGE-MANAGER purl pkg:maven/com.example/log4j-vulnerable-sample@1.0.1
+
+##### Package: /work
+
+PackageName: /work
+SPDXID: SPDXRef-Repository-e06249d80d2c93ac
+PackageDownloadLocation: git+/work
+PrimaryPackagePurpose: SOURCE
+FilesAnalyzed: false
+
+##### Relationships
+
+Relationship: SPDXRef-Application-157bf9114c968510 CONTAINS SPDXRef-Package-afb4a9838a1d7d94
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-Repository-e06249d80d2c93ac
+Relationship: SPDXRef-Package-afb4a9838a1d7d94 DEPENDS_ON SPDXRef-Package-130ffcfe7a758933
+Relationship: SPDXRef-Repository-e06249d80d2c93ac CONTAINS SPDXRef-Application-157bf9114c968510
+

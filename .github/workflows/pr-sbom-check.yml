@@ -1,0 +1,76 @@
+name: PR SBOM Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  sbom-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build TypeScript scripts
+        run: npm run build
+      
+      - name: Install Syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+      
+      - name: Generate SBOM with Syft
+        run: |
+          syft . -o cyclonedx-json=sbom-current.json
+          echo "SBOM generated successfully"
+      
+      - name: Get previous SBOM from Dependency-Track
+        id: get-previous-sbom
+        run: |
+          node dist/scripts/dt-client-cli.js get-sbom "${{ github.event.repository.name }}" "latest" previous-sbom.json || echo "No previous SBOM found"
+          if [ -f previous-sbom.json ]; then
+            echo "previous_sbom_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "previous_sbom_exists=false" >> $GITHUB_OUTPUT
+            echo '{"bomFormat":"CycloneDX","specVersion":"1.4","components":[]}' > previous-sbom.json
+          fi
+        env:
+          DT_BASE_URL: ${{ secrets.DT_BASE_URL }}
+          DT_API_KEY: ${{ secrets.DT_API_KEY }}
+        continue-on-error: true
+      
+      - name: Compare SBOMs
+        run: |
+          node dist/scripts/diff-checker.js sbom-current.json previous-sbom.json diff-result.json
+      
+      - name: Post PR comment
+        run: |
+          ARTIFACT_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          node dist/scripts/pr-commenter.js ${{ github.event.pull_request.number }} diff-result.json "$ARTIFACT_URL" config/license-guidelines.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+      
+      - name: Upload SBOM as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-pr-${{ github.event.pull_request.number }}
+          path: |
+            sbom-current.json
+            diff-result.json
+          retention-days: 90

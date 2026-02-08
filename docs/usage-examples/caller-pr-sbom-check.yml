@@ -1,0 +1,32 @@
+# 他のプロジェクトで使用するサンプル
+# このファイルを .github/workflows/pr-sbom-check.yml としてコピーしてください
+
+name: PR SBOM Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  sbom-check:
+    uses: YOUR-ORG/log4j-vulnerable-sample/.github/workflows/reusable-pr-sbom-check.yml@main
+    with:
+      # オプション: カスタムライセンスガイドラインを使用する場合
+      # license-guidelines-path: 'config/my-license-guidelines.yml'
+      
+      # オプション: Node.jsバージョンを指定する場合
+      # node-version: '20'
+    secrets:
+      # Dependency-Track連携用（オプション）
+      DT_BASE_URL: ${{ secrets.DT_BASE_URL }}
+      DT_API_KEY: ${{ secrets.DT_API_KEY }}
+      
+      # GitHub token（必須）
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

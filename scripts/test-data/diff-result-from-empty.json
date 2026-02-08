@@ -1,0 +1,41 @@
+{
+  "comparisonInfo": {
+    "currentVersion": "1",
+    "previousVersion": "1",
+    "comparedAt": "2026-02-08T07:31:20.582Z"
+  },
+  "diffs": [
+    {
+      "changeType": "added",
+      "component": {
+        "type": "library",
+        "group": "org.apache.logging.log4j",
+        "name": "log4j-core",
+        "version": "2.14.1",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "changeType": "added",
+      "component": {
+        "type": "library",
+        "group": "com.fasterxml.jackson.core",
+        "name": "jackson-databind",
+        "version": "2.12.0",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

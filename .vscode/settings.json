@@ -1,0 +1,9 @@
+{
+    "kiroAgent.trustedCommands": [
+        "npm run *",
+        "npm test *",
+        "node *"
+    ],
+    "kiroAgent.configureMCP": "Enabled",
+    "typescript.autoClosingTags": false
+}

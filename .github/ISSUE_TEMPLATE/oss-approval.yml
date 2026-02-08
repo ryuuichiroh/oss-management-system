@@ -1,0 +1,160 @@
+name: OSS利用承認タスク
+description: 見直し完了後の承認タスク
+title: "[Approval] OSS利用承認"
+labels: ["oss-approval"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🔐 OSS利用承認タスク
+        
+        このIssueは、見直し完了後の承認のために自動生成されました。
+        見直し結果を確認し、問題がなければ承認してください。
+        
+        承認する場合は、最後の「承認する」チェックボックスをONにしてからIssueをクローズしてください。
+        承認しない場合は、チェックボックスをOFFのままクローズしてください。
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        ## 📋 見直し結果サマリ
+
+  - type: markdown
+    attributes:
+      value: |
+        **リリースバージョン:** v1.0.0
+        
+        **見直し担当者:** @reviewer-username
+        
+        **見直し完了日:** 2024-01-15
+        
+        **対象コンポーネント数:** 3件 (新規: 1件, 更新: 1件, 削除: 1件)
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        ## 🔍 コンポーネント別見直し結果
+
+  - type: markdown
+    attributes:
+      value: |
+        ### example-lib 1.0.0 (Apache-2.0) - 新規追加
+        
+        **見直し結果:**
+        - ✅ NOTICEファイルを確認し、必要に応じて製品に同梱した
+        - 改変内容: 改変なし
+        - ✅ ライセンステキストを製品に同梱した
+        
+        **ライセンス情報:**
+        - ライセンス: Apache-2.0
+        - 著作権者: Example Foundation
+        - ライセンスURL: https://www.apache.org/licenses/LICENSE-2.0
+
+  - type: markdown
+    attributes:
+      value: |
+        ### another-lib 1.1.0 (MIT) - バージョン更新 (1.0.0 → 1.1.0)
+        
+        **見直し結果:**
+        - ✅ 著作権表示とライセンステキストを製品に含めた
+        - ライセンス情報の記載場所: LICENSES/MIT.txt
+        
+        **ライセンス情報:**
+        - ライセンス: MIT
+        - 著作権者: Another Project Contributors
+        - ライセンスURL: https://opensource.org/licenses/MIT
+
+  - type: markdown
+    attributes:
+      value: |
+        ### old-lib 0.9.0 (BSD-3-Clause) - 削除
+        
+        **見直し結果:**
+        - 削除理由: 不要になったため削除。依存関係への影響なし。
+        
+        **確認事項:**
+        - ✅ 依存関係に問題がないことを確認済み
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        ## ✅ 承認前チェック事項
+
+  - type: checkboxes
+    id: approval-checks
+    attributes:
+      label: 承認前確認事項
+      description: すべての項目を確認してください
+      options:
+        - label: すべてのコンポーネントについて、ライセンス対応が適切に行われていることを確認した
+          required: true
+        - label: 著作権表示やライセンステキストの同梱が適切に行われていることを確認した
+          required: true
+        - label: コピーレフトライセンス(GPL等)の使用について、リスクを確認した
+          required: true
+        - label: セキュリティ脆弱性のあるバージョンが含まれていないことを確認した
+          required: true
+        - label: 削除されたコンポーネントについて、依存関係に問題がないことを確認した
+          required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        ## 📎 参考情報
+
+  - type: markdown
+    attributes:
+      value: |
+        - [SBOM アーティファクト](https://github.com/example/repo/actions/runs/123456)
+        - [見直し結果 JSON](https://github.com/example/repo/actions/runs/123456)
+        - [元の見直しIssue](https://github.com/example/repo/issues/123)
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        ## 💬 承認コメント
+
+  - type: textarea
+    id: approval-comment
+    attributes:
+      label: 承認コメント
+      description: 承認に関するコメントがあれば記載してください（任意）
+      placeholder: "例: すべての対応が適切に行われていることを確認しました。承認します。"
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        ## ✅ 承認
+
+  - type: checkboxes
+    id: approval-decision
+    attributes:
+      label: 承認判定
+      description: 承認する場合は、以下のチェックボックスをONにしてください
+      options:
+        - label: 承認する（SBOMをDependency-Trackに登録します）
+          required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        **注意事項:**
+        - すべての必須項目を確認してからIssueをクローズしてください
+        - 承認をONにした場合、SBOMが自動的にDependency-Trackに登録されます
+        - 承認をOFFにした場合、SBOMは登録されません（見直し担当者に差し戻してください）

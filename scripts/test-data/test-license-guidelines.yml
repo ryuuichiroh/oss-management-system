@@ -1,0 +1,48 @@
+version: "1.0"
+guidelines:
+  - license_id: "Apache-2.0"
+    common_instructions: "Apache License 2.0の規定に従い、著作権表示と許諾表示を保持してください。"
+    rules:
+      - condition: "always"
+        message: "NOTICEファイルが含まれている場合は製品に同梱してください。"
+        input_type: "checkbox"
+        label: "NOTICEファイルの対応"
+      - condition: "is_modified == true"
+        message: "改変を加えたファイルに、変更した旨の告知を記載してください。"
+        input_type: "text"
+        label: "改変内容のサマリ"
+
+  - license_id: "MIT"
+    common_instructions: "MIT Licenseの規定に従い、著作権表示とライセンステキストを保持してください。"
+    rules:
+      - condition: "always"
+        message: "著作権表示とライセンステキストを製品に同梱してください。"
+        input_type: "checkbox"
+        label: "ライセンステキストの同梱"
+      - condition: "is_distributed == true"
+        message: "配布する場合は、ライセンステキストを含めてください。"
+        input_type: "checkbox"
+        label: "配布時のライセンステキスト"
+
+  - license_id: "GPL-3.0"
+    common_instructions: "GPL-3.0の規定に従い、ソースコードの開示義務に注意してください。"
+    rules:
+      - condition: "link_type == 'static'"
+        message: "静的リンクの場合、製品全体をGPL-3.0でライセンスする必要があります。"
+        input_type: "select"
+        label: "対応方針"
+        options:
+          - "製品全体をGPL-3.0でライセンス"
+          - "動的リンクに変更"
+          - "代替ライブラリに置き換え"
+      - condition: "link_type == 'dynamic'"
+        message: "動的リンクの場合、LGPLと同様の扱いが可能です。"
+        input_type: "checkbox"
+        label: "動的リンクの確認"
+
+  - license_id: "BSD-3-Clause"
+    rules:
+      - condition: "always"
+        message: "著作権表示、条件、免責事項を保持してください。"
+        input_type: "checkbox"
+        label: "ライセンス条項の保持"

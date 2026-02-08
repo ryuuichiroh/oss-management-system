@@ -1,0 +1,184 @@
+name: OSS利用見直しタスク
+description: リリース前のOSS利用見直し
+title: "[Review] OSS利用見直し"
+labels: ["oss-review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 📋 OSS利用見直しタスク
+        
+        このIssueは、リリース前のOSS利用見直しのために自動生成されました。
+        各コンポーネントのライセンスガイドラインに従って対応を行い、必要な情報を入力してください。
+        
+        すべての対応が完了したら、このIssueをクローズしてください。
+        承認が必要な場合は、最後の「承認を依頼する」チェックボックスをONにしてからクローズしてください。
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        ## 🔍 差分一覧
+        
+        前回リリースとの差分が検出されました。以下のコンポーネントについて確認してください。
+
+  - type: markdown
+    attributes:
+      value: |
+        | 変更 | OSS名 | バージョン | ライセンス |
+        |------|-------|-----------|-----------|
+        | 🆕 | example-lib | 1.0.0 | Apache-2.0 |
+        | 🔄 | another-lib | 1.0.0 → 1.1.0 | MIT |
+        | ❌ | old-lib | 0.9.0 | BSD-3-Clause |
+        
+        **凡例:**
+        - 🆕 新規追加
+        - 🔄 バージョン更新
+        - ❌ 削除
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        ## ✅ 共通チェック事項
+
+  - type: checkboxes
+    id: common-checks
+    attributes:
+      label: 基本確認事項
+      description: すべての項目を確認してください
+      options:
+        - label: すべての新規OSSについて、ライセンス種別に誤りがないことを確認した
+          required: true
+        - label: 意図しないバージョンアップが含まれていないことを確認した
+          required: true
+        - label: 削除されたOSSについて、依存関係に問題がないことを確認した
+          required: false
+        - label: セキュリティ脆弱性のあるバージョンが含まれていないことを確認した
+          required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        ## 📝 コンポーネント別対応
+        
+        以下、各コンポーネントのライセンスガイドラインに従って対応してください。
+
+  - type: markdown
+    attributes:
+      value: |
+        ### example-lib (Apache-2.0) - 新規追加
+        
+        **ガイドライン:**
+        - Apache License 2.0の規定に従い、著作権表示と許諾表示を保持してください。
+        - NOTICEファイルが含まれている場合は製品に同梱してください。
+
+  - type: checkboxes
+    id: example-lib-notice
+    attributes:
+      label: example-lib - NOTICEファイルの対応
+      options:
+        - label: NOTICEファイルを確認し、必要に応じて製品に同梱した
+          required: true
+
+  - type: input
+    id: example-lib-modified
+    attributes:
+      label: example-lib - 改変内容のサマリ
+      description: 改変を加えた場合は、変更内容を記載してください
+      placeholder: "改変なし / 改変内容の概要"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: example-lib-license-text
+    attributes:
+      label: example-lib - ライセンステキストの同梱確認
+      options:
+        - label: ライセンステキストを製品に同梱した
+          required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ### another-lib (MIT) - バージョン更新 (1.0.0 → 1.1.0)
+        
+        **ガイドライン:**
+        - MIT Licenseの規定に従い、著作権表示とライセンステキストを保持してください。
+
+  - type: checkboxes
+    id: another-lib-copyright
+    attributes:
+      label: another-lib - 著作権表示とライセンステキストの同梱
+      options:
+        - label: 著作権表示とライセンステキストを製品に含めた
+          required: true
+
+  - type: input
+    id: another-lib-location
+    attributes:
+      label: another-lib - ライセンス情報の記載場所
+      description: バイナリ配布の場合、ライセンス情報の記載場所を指定してください
+      placeholder: "例: LICENSES/MIT.txt, README.md, About画面"
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ### old-lib (BSD-3-Clause) - 削除
+        
+        **確認事項:**
+        - 削除されたコンポーネントについて、依存関係に問題がないことを確認してください。
+
+  - type: input
+    id: old-lib-removal
+    attributes:
+      label: old-lib - 削除理由と影響確認
+      description: 削除理由と、依存関係への影響がないことを確認した旨を記載してください
+      placeholder: "例: 不要になったため削除。依存関係への影響なし。"
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        ## 📎 参考情報
+
+  - type: markdown
+    attributes:
+      value: |
+        - [SBOM アーティファクト](https://github.com/example/repo/actions/runs/123456)
+        - [差分結果 JSON](https://github.com/example/repo/actions/runs/123456)
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        ## 🚀 承認依頼
+
+  - type: checkboxes
+    id: approval-request
+    attributes:
+      label: 承認依頼
+      description: 管理者に承認を依頼する場合は、以下のチェックボックスをONにしてください
+      options:
+        - label: 管理者に承認を依頼する
+          required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        **注意事項:**
+        - すべての必須項目に入力してからIssueをクローズしてください
+        - 承認依頼をONにした場合、自動的に承認Issueが作成されます
+        - 承認依頼をOFFにした場合、このIssueをクローズすると処理が完了します

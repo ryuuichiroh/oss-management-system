@@ -1,0 +1,41 @@
+{
+  "comparisonInfo": {
+    "currentVersion": "v1.0.0",
+    "previousVersion": "v0.9.0",
+    "comparedAt": "2024-01-01T00:00:00Z"
+  },
+  "diffs": [
+    {
+      "changeType": "added",
+      "component": {
+        "type": "library",
+        "group": "org.apache.logging.log4j",
+        "name": "log4j-core",
+        "version": "2.17.0",
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "changeType": "updated",
+      "component": {
+        "type": "library",
+        "name": "fast-json",
+        "version": "1.5.0",
+        "licenses": [
+          {
+            "license": {
+              "id": "MIT"
+            }
+          }
+        ]
+      },
+      "previousVersion": "1.4.0"
+    }
+  ]
+}

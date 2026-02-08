@@ -1,0 +1,109 @@
+name: Reusable Review Issue Close
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: 'Node.js version to use'
+        required: false
+        type: string
+        default: '20'
+    secrets:
+      GITHUB_TOKEN:
+        description: 'GitHub token for API access'
+        required: true
+
+jobs:
+  process-review:
+    runs-on: ubuntu-latest
+    # Only run if the issue has the 'oss-review' label
+    if: contains(github.event.issue.labels.*.name, 'oss-review')
+    
+    steps:
+      - name: Checkout calling repository
+        uses: actions/checkout@v4
+      
+      - name: Checkout OSS management scripts
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/log4j-vulnerable-sample
+          path: .oss-management
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+      
+      - name: Install OSS management dependencies
+        run: |
+          cd .oss-management
+          npm ci
+          npm run build
+      
+      - name: Save issue body to file
+        run: |
+          cat > issue-body.txt << 'EOF'
+          ${{ github.event.issue.body }}
+          EOF
+      
+      - name: Extract version from issue title
+        id: extract-version
+        run: |
+          TITLE="${{ github.event.issue.title }}"
+          # Extract version from title like "[Review] OSS利用見直し v1.0.0"
+          VERSION=$(echo "$TITLE" | sed -n 's/.*OSS利用見直し \(.*\)/\1/p' | xargs)
+          if [ -z "$VERSION" ]; then
+            VERSION="unknown"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION"
+      
+      - name: Parse review results
+        run: |
+          node .oss-management/dist/scripts/issue-parser.js review issue-body.txt "${{ github.event.issue.user.login }}" "${{ steps.extract-version.outputs.version }}" review-results.json
+          echo "Review results parsed successfully"
+      
+      - name: Check approval request
+        id: check-approval
+        run: |
+          node .oss-management/dist/scripts/issue-parser.js approval-request issue-body.txt
+          APPROVAL_REQUESTED=$?
+          if [ $APPROVAL_REQUESTED -eq 0 ]; then
+            echo "approval_requested=true" >> $GITHUB_OUTPUT
+            echo "Approval requested: YES"
+          else
+            echo "approval_requested=false" >> $GITHUB_OUTPUT
+            echo "Approval requested: NO"
+          fi
+      
+      - name: Upload review results as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: review-results-${{ steps.extract-version.outputs.version }}
+          path: review-results.json
+          retention-days: 90
+      
+      - name: Create approval issue
+        if: steps.check-approval.outputs.approval_requested == 'true'
+        run: |
+          VERSION="${{ steps.extract-version.outputs.version }}"
+          SBOM_ARTIFACT_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          REVIEW_JSON_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          node .oss-management/dist/scripts/issue-creator.js approval "$VERSION" review-results.json "$SBOM_ARTIFACT_URL" "$REVIEW_JSON_URL"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+      
+      - name: Add comment to review issue
+        if: steps.check-approval.outputs.approval_requested == 'false'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '✅ 見直しが完了しました。承認依頼はありません。\n\n📄 見直し結果はアーティファクトとして保存されました。'
+            });

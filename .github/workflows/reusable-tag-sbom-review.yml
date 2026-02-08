@@ -1,0 +1,108 @@
+name: Reusable Tag SBOM Review
+
+on:
+  workflow_call:
+    inputs:
+      license-guidelines-path:
+        description: 'Path to license guidelines YAML file in the calling repository'
+        required: false
+        type: string
+        default: ''
+      node-version:
+        description: 'Node.js version to use'
+        required: false
+        type: string
+        default: '20'
+    secrets:
+      DT_BASE_URL:
+        description: 'Dependency-Track base URL'
+        required: false
+      DT_API_KEY:
+        description: 'Dependency-Track API key'
+        required: false
+      GITHUB_TOKEN:
+        description: 'GitHub token for API access'
+        required: true
+
+jobs:
+  sbom-review:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout calling repository
+        uses: actions/checkout@v4
+      
+      - name: Checkout OSS management scripts
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/log4j-vulnerable-sample
+          path: .oss-management
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+      
+      - name: Install OSS management dependencies
+        run: |
+          cd .oss-management
+          npm ci
+          npm run build
+      
+      - name: Install Syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+      
+      - name: Generate SBOM with Syft
+        run: |
+          syft . -o cyclonedx-json=sbom-current.json
+          echo "SBOM generated successfully"
+      
+      - name: Get previous SBOM from Dependency-Track
+        id: get-previous-sbom
+        run: |
+          node .oss-management/dist/scripts/dt-client-cli.js get-sbom "${{ github.event.repository.name }}" "latest" previous-sbom.json || echo "No previous SBOM found"
+          if [ -f previous-sbom.json ]; then
+            echo "previous_sbom_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "previous_sbom_exists=false" >> $GITHUB_OUTPUT
+            echo '{"bomFormat":"CycloneDX","specVersion":"1.4","components":[]}' > previous-sbom.json
+          fi
+        env:
+          DT_BASE_URL: ${{ secrets.DT_BASE_URL }}
+          DT_API_KEY: ${{ secrets.DT_API_KEY }}
+        continue-on-error: true
+      
+      - name: Compare SBOMs
+        run: |
+          node .oss-management/dist/scripts/diff-checker.js sbom-current.json previous-sbom.json diff-result.json
+      
+      - name: Determine license guidelines path
+        id: guidelines-path
+        run: |
+          if [ -n "${{ inputs.license-guidelines-path }}" ] && [ -f "${{ inputs.license-guidelines-path }}" ]; then
+            echo "path=${{ inputs.license-guidelines-path }}" >> $GITHUB_OUTPUT
+            echo "Using custom guidelines: ${{ inputs.license-guidelines-path }}"
+          else
+            echo "path=.oss-management/config/license-guidelines.yml" >> $GITHUB_OUTPUT
+            echo "Using default guidelines from OSS management repository"
+          fi
+      
+      - name: Create review issue
+        run: |
+          TAG_NAME="${{ github.ref_name }}"
+          ARTIFACT_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          node .oss-management/dist/scripts/issue-creator.js review "$TAG_NAME" diff-result.json "$ARTIFACT_URL" "${{ steps.guidelines-path.outputs.path }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+      
+      - name: Upload SBOM as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-tag-${{ github.ref_name }}
+          path: |
+            sbom-current.json
+            diff-result.json
+          retention-days: 90

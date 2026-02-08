@@ -1,0 +1,24 @@
+{
+  "org.apache.logging.log4j:log4j-core": [
+    {
+      "condition": "always",
+      "message": "NOTICEファイルが含まれている場合は製品に同梱してください。",
+      "inputType": "checkbox",
+      "label": "NOTICEファイルの対応"
+    },
+    {
+      "condition": "is_modified == true",
+      "message": "改変を加えたファイルに、変更した旨の告知を記載してください。",
+      "inputType": "text",
+      "label": "改変内容のサマリ"
+    }
+  ],
+  ":fast-json": [
+    {
+      "condition": "always",
+      "message": "著作権表示とライセンステキストを保持してください。",
+      "inputType": "checkbox",
+      "label": "ライセンステキストの保持"
+    }
+  ]
+}
