@@ -83,6 +83,34 @@ PRが作成されたときにSBOMを生成し、差分をPRコメントとして
 
 ## セットアップ手順
 
+### ステップ0: Syft除外設定（推奨）
+
+SyftでSBOMを生成する際、不要なファイル（GitHub Actionsワークフローなど）を除外することを推奨します。
+
+あなたのプロジェクトのルートディレクトリに `.syft.yaml` を作成:
+
+```yaml
+# .syft.yaml
+exclude:
+  - "./.github/**"           # GitHub Actions ワークフロー
+  - "./.git/**"              # Git メタデータ
+  - "**/node_modules/**"     # Node.js 依存関係（必要に応じて）
+  - "**/test/**"             # テストファイル（必要に応じて）
+  - "**/tests/**"            # テストファイル（必要に応じて）
+```
+
+この設定により、SBOMには実際のアプリケーション依存関係のみが含まれます。
+
+**代替方法**: ワークフローファイルを直接編集する場合は、Syftコマンドに `--exclude` オプションを追加できます:
+
+```yaml
+- name: Generate SBOM with Syft
+  run: |
+    syft . -o cyclonedx-json=sbom-current.json --exclude './.github/**' --exclude './.git/**'
+```
+
+ただし、`.syft.yaml` を使用する方が管理しやすく推奨されます。
+
 ### ステップ1: サンプルファイルをコピー
 
 `docs/usage-examples/` ディレクトリにあるサンプルファイルを、あなたのプロジェクトの `.github/workflows/` ディレクトリにコピーします:
