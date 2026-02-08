@@ -29,6 +29,15 @@ jobs:
       - name: Checkout calling repository
         uses: actions/checkout@v4
       
+      - name: Install Syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+      
+      - name: Generate SBOM with Syft
+        run: |
+          syft . -o cyclonedx-json=sbom-current.json
+          echo "SBOM generated successfully"
+      
       - name: Checkout OSS management scripts
         uses: actions/checkout@v4
         with:
@@ -46,15 +55,6 @@ jobs:
           cd .oss-management
           npm ci
           npm run build
-      
-      - name: Install Syft
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
-      
-      - name: Generate SBOM with Syft
-        run: |
-          syft . -o cyclonedx-json=sbom-current.json
-          echo "SBOM generated successfully"
       
       - name: Get previous SBOM from Dependency-Track
         id: get-previous-sbom
