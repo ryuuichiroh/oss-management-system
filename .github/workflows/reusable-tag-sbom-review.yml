@@ -32,7 +32,7 @@ jobs:
       - name: Checkout OSS management scripts
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository_owner }}/log4j-vulnerable-sample
+          repository: ${{ github.repository_owner }}/oss-management-system
           path: .oss-management
           token: ${{ secrets.GITHUB_TOKEN }}
       
