@@ -8,10 +8,6 @@ on:
         required: false
         type: string
         default: '20'
-    secrets:
-      GITHUB_TOKEN:
-        description: 'GitHub token for API access'
-        required: true
 
 jobs:
   process-review:

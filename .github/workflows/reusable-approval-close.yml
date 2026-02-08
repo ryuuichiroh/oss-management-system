@@ -15,9 +15,6 @@ on:
       DT_API_KEY:
         description: 'Dependency-Track API key'
         required: false
-      GITHUB_TOKEN:
-        description: 'GitHub token for API access'
-        required: true
 
 jobs:
   process-approval:
