@@ -91,7 +91,7 @@ npm run build
 
 ### 環境変数の設定
 
-GitHub リポジトリのSettings > Secrets and variablesで以下のシークレットを設定してください:
+GitHub リポジトリのSettings > Secrets and variablesで以下のシークレットと変数を設定してください:
 
 #### 必須
 
@@ -99,10 +99,101 @@ GitHub リポジトリのSettings > Secrets and variablesで以下のシーク�
 
 #### Dependency-Track連携用 (オプション)
 
+**Secrets:**
 - `DT_BASE_URL`: Dependency-TrackのベースURL (例: `https://dtrack.example.com`)
 - `DT_API_KEY`: Dependency-TrackのAPIキー
 
+**Variables (Settings > Secrets and variables > Actions > Variables):**
+- `PREVIOUS_VERSION`: ⚠️ **非推奨** - 設定ファイル方式（`oss-management-system.yml`）の使用を推奨
+  - 例: `v1.0.0`, `v2.1.0`
+  - **未設定の場合**: 最初のバージョンとして扱われます
+  - **初回実行時**: DT に該当バージョンが登録されていない場合は、空の SBOM と比較されます（すべてのコンポーネントが新規として扱われます）
+  - **移行方法**: 下記の「設定ファイルによるバージョン管理」セクションを参照
+
+**注意**: Dependency-Track のバージョンは Git のタグ名と一致させる必要があります（例: タグ `v1.0.0` → DT のバージョン `v1.0.0`）
+
 Dependency-Track連携を使用しない場合、システムは初回リリースとして動作し、すべてのコンポーネントを新規として扱います。
+
+### 設定ファイルによるバージョン管理 (推奨)
+
+**v2.0以降では、設定ファイルを使用したバージョン管理が推奨されます。**
+
+呼び出し元リポジトリのルートに `oss-management-system.yml` ファイルを配置することで、比較対象のバージョンを明示的に指定できます。
+
+#### 設定ファイルの作成
+
+プロジェクトのルートディレクトリに `oss-management-system.yml` を作成:
+
+```yaml
+# 差分比較時にDependency-Trackから取得するプロジェクトバージョン
+pre-project-version: v1.0.0
+```
+
+#### 設定項目
+
+- `pre-project-version` (string, optional): 比較対象とする過去のバージョン
+  - 形式: 任意の文字列（通常はGitタグと同じ形式、例: `v1.0.0`, `1.0.0`）
+  - **未設定または空の場合**: 最初のバージョンとして扱われ、すべてのコンポーネントが新規として扱われます
+  - **Dependency-Trackに該当バージョンが存在しない場合**: 最初のバージョンとして扱われます
+
+#### 使用例
+
+**初回リリースの場合:**
+
+```yaml
+# ファイルを作成しないか、pre-project-versionを空にする
+pre-project-version:
+```
+
+または設定ファイル自体を作成しない。
+
+**2回目以降のリリースの場合:**
+
+```yaml
+# 前回のリリースバージョンを指定
+pre-project-version: v1.0.0
+```
+
+**リリース後の更新:**
+
+v1.1.0をリリースした後、次のリリース準備のために更新:
+
+```yaml
+# v1.1.0と比較するように更新
+pre-project-version: v1.1.0
+```
+
+#### 動作の仕組み
+
+1. **PR作成時**: 設定ファイルから `pre-project-version` を読み取り、Dependency-Trackから該当バージョンのSBOMを取得して差分比較
+2. **タグ作成時**: 同様に設定ファイルから比較対象バージョンを取得し、見直しIssueを作成
+3. **設定ファイルがない場合**: 最初のバージョンとして扱い、空のSBOMと比較（すべてのコンポーネントが新規）
+
+#### 環境変数からの移行
+
+従来の `PREVIOUS_VERSION` 環境変数を使用している場合、以下の手順で移行できます:
+
+1. プロジェクトのルートに `oss-management-system.yml` を作成
+2. 現在の `PREVIOUS_VERSION` の値を `pre-project-version` に設定
+3. GitHub リポジトリの Variables から `PREVIOUS_VERSION` を削除（オプション）
+
+**移行例:**
+
+従来の設定（GitHub Variables）:
+```
+PREVIOUS_VERSION=v1.0.0
+```
+
+新しい設定（oss-management-system.yml）:
+```yaml
+pre-project-version: v1.0.0
+```
+
+**移行のメリット:**
+- バージョン管理がコードと一緒にバージョン管理される
+- PRレビュー時に設定変更が可視化される
+- 環境変数の設定ミスを防げる
+- リポジトリごとに独立した設定が可能
 
 ### ライセンスガイドラインの設定
 
@@ -371,6 +462,15 @@ jobs:
     secrets:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
+
+**重要**: プロジェクトのルートに `oss-management-system.yml` を作成して、比較対象バージョンを指定してください:
+
+```yaml
+# 初回リリースの場合は空にするか、ファイルを作成しない
+pre-project-version: v1.0.0
+```
+
+詳細は上記の「設定ファイルによるバージョン管理」セクションを参照してください。
 
 ### 詳細なドキュメント
 

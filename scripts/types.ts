@@ -161,3 +161,34 @@ export interface DTComponentProperty {
   propertyValue: string;
   propertyType?: "STRING" | "INTEGER" | "BOOLEAN" | "NUMBER";
 }
+
+// ============================================================================
+// Config-Based Version Management Types
+// ============================================================================
+
+/**
+ * Configuration file structure for oss-management-system.yml
+ */
+export interface OSSManagementConfig {
+  preProjectVersion?: string | null;
+}
+
+/**
+ * Result of config file reading operation
+ */
+export interface ConfigReadResult {
+  success: boolean;
+  config?: OSSManagementConfig;
+  error?: string;
+  filePath: string;
+}
+
+/**
+ * Version resolution result
+ */
+export interface VersionResolution {
+  previousVersion: string | null;
+  isFirstVersion: boolean;
+  source: 'config-file' | 'first-version' | 'dt-not-found';
+  reason?: string;
+}

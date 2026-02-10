@@ -96,8 +96,19 @@ async function main() {
     const previousSbom: SBOM = JSON.parse(previousSbomContent);
     
     // Validate SBOM format
-    if (currentSbom.bomFormat !== 'CycloneDX' || previousSbom.bomFormat !== 'CycloneDX') {
-      throw new Error('Invalid SBOM format. Expected CycloneDX format.');
+    if (!currentSbom.bomFormat || currentSbom.bomFormat !== 'CycloneDX') {
+      throw new Error(`Invalid current SBOM format. Expected 'CycloneDX', got: '${currentSbom.bomFormat}'`);
+    }
+    if (!previousSbom.bomFormat || previousSbom.bomFormat !== 'CycloneDX') {
+      throw new Error(`Invalid previous SBOM format. Expected 'CycloneDX', got: '${previousSbom.bomFormat}'`);
+    }
+    
+    // Validate components array
+    if (!Array.isArray(currentSbom.components)) {
+      throw new Error(`Invalid current SBOM: 'components' must be an array. Got: ${typeof currentSbom.components}`);
+    }
+    if (!Array.isArray(previousSbom.components)) {
+      throw new Error(`Invalid previous SBOM: 'components' must be an array. Got: ${typeof previousSbom.components}`);
     }
     
     // Compare SBOMs

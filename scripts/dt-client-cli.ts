@@ -95,6 +95,11 @@ async function handleGetSBOM(args: string[]) {
     process.exit(1);
   }
   
+  // Ensure components is an array
+  if (!sbom.components) {
+    sbom.components = [];
+  }
+  
   fs.writeFileSync(outputPath, JSON.stringify(sbom, null, 2), 'utf-8');
   console.log(`SBOM saved to: ${outputPath}`);
   console.log(`Components: ${sbom.components.length}`);
