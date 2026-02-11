@@ -76,36 +76,71 @@ jobs:
             echo "Approval status: NOT APPROVED"
           fi
       
+      - name: Extract artifact run IDs from issue body
+        if: steps.check-approval.outputs.approved == 'true'
+        id: extract-run-ids
+        run: |
+          # Extract SBOM artifact run ID
+          SBOM_RUN_ID=$(cat issue-body.txt | grep -oP 'SBOM.*?actions/runs/\K[0-9]+' | head -1)
+          if [ -z "$SBOM_RUN_ID" ]; then
+            echo "Error: Could not extract SBOM run ID from issue body"
+            exit 1
+          fi
+          echo "sbom_run_id=$SBOM_RUN_ID" >> $GITHUB_OUTPUT
+          echo "SBOM run ID: $SBOM_RUN_ID"
+          
+          # Extract review results run ID
+          REVIEW_RUN_ID=$(cat issue-body.txt | grep -oP '見直し結果.*?actions/runs/\K[0-9]+' | head -1)
+          if [ -z "$REVIEW_RUN_ID" ]; then
+            echo "Error: Could not extract review results run ID from issue body"
+            exit 1
+          fi
+          echo "review_run_id=$REVIEW_RUN_ID" >> $GITHUB_OUTPUT
+          echo "Review results run ID: $REVIEW_RUN_ID"
+      
       - name: Download SBOM artifact
         if: steps.check-approval.outputs.approved == 'true'
-        id: download-sbom
-        run: |
-          echo "sbom_path=sbom-cyclonedx.json" >> $GITHUB_OUTPUT
-          
-          # If SBOM file exists in the repo, use it; otherwise, this step would need
-          # to download from the artifact URL mentioned in the issue
-          if [ -f "sbom-cyclonedx.json" ]; then
-            echo "Using SBOM from repository"
-          else
-            echo "Warning: SBOM file not found. In production, download from artifact URL."
-            # Create a minimal SBOM for demonstration
-            echo '{"bomFormat":"CycloneDX","specVersion":"1.4","components":[]}' > sbom-cyclonedx.json
-          fi
+        uses: actions/download-artifact@v4
+        with:
+          name: sbom-${{ steps.extract-version.outputs.version }}
+          run-id: ${{ steps.extract-run-ids.outputs.sbom_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ./artifacts/sbom
       
       - name: Download review results artifact
         if: steps.check-approval.outputs.approved == 'true'
-        id: download-review
+        uses: actions/download-artifact@v4
+        with:
+          name: review-results-${{ steps.extract-version.outputs.version }}
+          run-id: ${{ steps.extract-run-ids.outputs.review_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ./artifacts/review
+      
+      - name: Verify downloaded artifacts
+        if: steps.check-approval.outputs.approved == 'true'
+        id: verify-artifacts
         run: |
-          echo "review_path=review-results.json" >> $GITHUB_OUTPUT
-          
-          # If review results file exists, use it; otherwise, download from artifact URL
-          if [ -f "review-results.json" ]; then
-            echo "Using review results from repository"
-          else
-            echo "Warning: Review results file not found. In production, download from artifact URL."
-            # Create a minimal review results for demonstration
-            echo '{"version":"unknown","reviewedAt":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","reviewer":"unknown","results":[]}' > review-results.json
+          # Find SBOM file
+          SBOM_FILE=$(find ./artifacts/sbom -name "*.json" -type f | head -1)
+          if [ -z "$SBOM_FILE" ]; then
+            echo "Error: SBOM file not found in downloaded artifact"
+            exit 1
           fi
+          echo "sbom_path=$SBOM_FILE" >> $GITHUB_OUTPUT
+          echo "Found SBOM: $SBOM_FILE"
+          
+          # Find review results file
+          REVIEW_FILE=$(find ./artifacts/review -name "*.json" -type f | head -1)
+          if [ -z "$REVIEW_FILE" ]; then
+            echo "Error: Review results file not found in downloaded artifact"
+            exit 1
+          fi
+          echo "review_path=$REVIEW_FILE" >> $GITHUB_OUTPUT
+          echo "Found review results: $REVIEW_FILE"
+          
+          # Display file info
+          echo "SBOM components count: $(jq '.components | length' "$SBOM_FILE")"
+          echo "Review results count: $(jq '.results | length' "$REVIEW_FILE")"
       
       - name: Upload SBOM to Dependency-Track
         if: steps.check-approval.outputs.approved == 'true'
@@ -118,7 +153,7 @@ jobs:
           echo "Project: $PROJECT_NAME"
           echo "Version: $VERSION"
           
-          node .oss-management/dist/scripts/dt-client-cli.js upload-sbom "$PROJECT_NAME" "$VERSION" "${{ steps.download-sbom.outputs.sbom_path }}"
+          node .oss-management/dist/scripts/dt-client-cli.js upload-sbom "$PROJECT_NAME" "$VERSION" "${{ steps.verify-artifacts.outputs.sbom_path }}"
           
           echo "SBOM uploaded successfully"
         env:
@@ -130,7 +165,7 @@ jobs:
         run: |
           PROJECT_NAME="${{ github.repository }}"
           VERSION="${{ steps.extract-version.outputs.version }}"
-          REVIEW_RESULTS_PATH="${{ steps.download-review.outputs.review_path }}"
+          REVIEW_RESULTS_PATH="${{ steps.verify-artifacts.outputs.review_path }}"
           
           echo "Setting component properties from review results..."
           
