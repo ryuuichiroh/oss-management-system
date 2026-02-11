@@ -154,9 +154,8 @@ function generateReviewIssueForm(version, diffs, guidelinesMap, sbomArtifactUrl)
     });
     // Add guidelines and input fields for each component
     for (const diff of diffs) {
-        const componentKey = `${diff.component.group || ''}:${diff.component.name}`;
-        const guidelines = guidelinesMap.get(componentKey) || [];
         const licenseId = getLicenseId(diff.component);
+        const guidelines = guidelinesMap.get(licenseId) || [];
         if (guidelines.length === 0) {
             continue;
         }
@@ -326,7 +325,7 @@ async function main() {
     const args = process.argv.slice(2);
     if (args.length < 1) {
         console.error('Usage:');
-        console.error('  Review Issue: node issue-creator.js review <version> <diff-result.json> <guidelines-map.json> <sbom-url> [assignee]');
+        console.error('  Review Issue: node issue-creator.js review <version> <diff-result.json> <sbom-url> <guidelines-yaml> [assignee]');
         console.error('  Approval Issue: node issue-creator.js approval <version> <review-results.json> <sbom-url> <review-json-url> [assignee]');
         process.exit(1);
     }
@@ -340,17 +339,23 @@ async function main() {
             }
             const version = args[1];
             const diffResultPath = args[2];
-            const guidelinesMapPath = args[3];
-            const sbomUrl = args[4];
+            const sbomUrl = args[3];
+            const guidelinesYamlPath = args[4];
             const assignee = args[5];
             // Read diff result
             const diffResultContent = fs.readFileSync(diffResultPath, 'utf-8');
             const diffResult = JSON.parse(diffResultContent);
             const diffs = diffResult.diffs;
-            // Read guidelines map
-            const guidelinesMapContent = fs.readFileSync(guidelinesMapPath, 'utf-8');
-            const guidelinesMapObj = JSON.parse(guidelinesMapContent);
-            const guidelinesMap = new Map(Object.entries(guidelinesMapObj));
+            // Build guidelines map from YAML using LicenseGuideProvider
+            const { LicenseGuideProvider } = await Promise.resolve().then(() => __importStar(require('./license-guide-provider')));
+            const guideProvider = new LicenseGuideProvider(guidelinesYamlPath);
+            guideProvider.loadConfig();
+            const guidelinesMap = new Map();
+            for (const diff of diffs) {
+                const licenseId = getLicenseId(diff.component);
+                const guidelines = guideProvider.getGuidelines(licenseId);
+                guidelinesMap.set(licenseId, guidelines);
+            }
             // Generate issue form
             const issueFormYaml = generateReviewIssueForm(version, diffs, guidelinesMap, sbomUrl);
             // Output to file for inspection

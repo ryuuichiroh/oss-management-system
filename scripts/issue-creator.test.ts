@@ -43,7 +43,7 @@ describe('Issue Creator', () => {
       ];
       
       const guidelinesMap = new Map<string, Guideline[]>();
-      guidelinesMap.set('org.example:test-lib', guidelines);
+      guidelinesMap.set('Apache-2.0', guidelines);
       
       const sbomUrl = 'https://example.com/sbom.json';
       
@@ -215,7 +215,7 @@ describe('Issue Creator', () => {
       ];
       
       const guidelinesMap = new Map<string, Guideline[]>();
-      guidelinesMap.set(':test-lib', guidelines);
+      guidelinesMap.set('Apache-2.0', guidelines);
       
       const sbomUrl = 'https://example.com/sbom.json';
       
