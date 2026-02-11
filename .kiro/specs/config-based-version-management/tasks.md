@@ -192,7 +192,7 @@
     - Include examples for different scenarios
     - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 2.3, 2.4, 2.5_
 
-- [-] 14. Final checkpoint - Comprehensive testing
+- [x] 14. Final checkpoint - Comprehensive testing
   - Run all unit tests
   - Run all property tests (minimum 100 iterations each)
   - Verify all tests pass
@@ -200,7 +200,7 @@
   - Ask the user if questions arise
 
 - [ ] 15. Create example configuration file
-  - [~] 15.1 Create example `oss-management-system.yml` in docs
+  - [x] 15.1 Create example `oss-management-system.yml` in docs
     - Include comments explaining each field
     - Provide examples for different use cases
     - _Requirements: 1.1, 1.2, 1.3_
