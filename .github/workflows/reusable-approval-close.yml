@@ -211,7 +211,8 @@ jobs:
               let propertyCount = 0;
               for (const [label, value] of Object.entries(result.actions)) {
                 const componentJson = JSON.stringify(component);
-                const propertyName = 'review_' + label.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+                // Use the original label as property name (supports Japanese)
+                const propertyName = label;
                 const propertyValue = value;
                 
                 console.log('');
