@@ -120,10 +120,19 @@ jobs:
         if: steps.check-approval.outputs.approved == 'true'
         id: verify-artifacts
         run: |
-          # Find SBOM file
-          SBOM_FILE=$(find ./artifacts/sbom -name "*.json" -type f | head -1)
+          # Find SBOM file (must have bomFormat field)
+          SBOM_FILE=""
+          for file in ./artifacts/sbom/*.json; do
+            if [ -f "$file" ] && jq -e '.bomFormat' "$file" > /dev/null 2>&1; then
+              SBOM_FILE="$file"
+              break
+            fi
+          done
+          
           if [ -z "$SBOM_FILE" ]; then
             echo "Error: SBOM file not found in downloaded artifact"
+            echo "Available files:"
+            ls -la ./artifacts/sbom/
             exit 1
           fi
           echo "sbom_path=$SBOM_FILE" >> $GITHUB_OUTPUT
