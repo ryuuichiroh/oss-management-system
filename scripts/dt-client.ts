@@ -178,6 +178,13 @@ export async function uploadSBOM(
 ): Promise<string> {
   const url = `${DT_BASE_URL}/api/v1/bom`;
 
+  // Ensure SBOM has required 'version' field (BOM version, not project version)
+  // If not set, try to get the current BOM version from DT and increment it
+  if (!sbom.version) {
+    const existingSBOM = await getSBOM(projectName, version);
+    sbom.version = existingSBOM?.version ? existingSBOM.version + 1 : 1;
+  }
+
   // Encode SBOM as base64
   const sbomJson = JSON.stringify(sbom);
   const sbomBase64 = Buffer.from(sbomJson).toString('base64');

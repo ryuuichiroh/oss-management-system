@@ -44,10 +44,12 @@ jobs:
           ${{ github.event.issue.body }}
           EOF
       
-      - name: Extract version from issue title
-        id: extract-version
+      - name: Extract version and run ID from issue
+        id: extract-info
         run: |
           TITLE="${{ github.event.issue.title }}"
+          BODY="${{ github.event.issue.body }}"
+          
           # Extract version from title like "[Review] OSS利用見直し v1.0.0"
           VERSION=$(echo "$TITLE" | sed -n 's/.*OSS利用見直し \(.*\)/\1/p' | xargs)
           if [ -z "$VERSION" ]; then
@@ -55,10 +57,20 @@ jobs:
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Extracted version: $VERSION"
+          
+          # Extract run ID from SBOM artifact URL in issue body
+          # URL format: https://github.com/owner/repo/actions/runs/12345
+          RUN_ID=$(echo "$BODY" | grep -oP 'actions/runs/\K[0-9]+' | head -1)
+          if [ -z "$RUN_ID" ]; then
+            RUN_ID="${{ github.run_id }}"
+            echo "Could not extract run ID from issue, using current run ID"
+          fi
+          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+          echo "Extracted run ID: $RUN_ID"
       
       - name: Parse review results
         run: |
-          node .oss-management/dist/scripts/issue-parser.js review issue-body.txt "${{ github.event.issue.user.login }}" "${{ steps.extract-version.outputs.version }}" review-results.json
+          node .oss-management/dist/scripts/issue-parser.js review issue-body.txt "${{ github.event.issue.user.login }}" "${{ steps.extract-info.outputs.version }}" review-results.json
           echo "Review results parsed successfully"
       
       - name: Check approval request
@@ -77,15 +89,16 @@ jobs:
       - name: Upload review results as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: review-results-${{ steps.extract-version.outputs.version }}
+          name: review-results-${{ steps.extract-info.outputs.version }}
           path: review-results.json
           retention-days: 90
       
       - name: Create approval issue
         if: steps.check-approval.outputs.approval_requested == 'true'
         run: |
-          VERSION="${{ steps.extract-version.outputs.version }}"
-          SBOM_ARTIFACT_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          VERSION="${{ steps.extract-info.outputs.version }}"
+          ORIGINAL_RUN_ID="${{ steps.extract-info.outputs.run_id }}"
+          SBOM_ARTIFACT_URL="https://github.com/${{ github.repository }}/actions/runs/$ORIGINAL_RUN_ID"
           REVIEW_JSON_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           node .oss-management/dist/scripts/issue-creator.js approval "$VERSION" review-results.json "$SBOM_ARTIFACT_URL" "$REVIEW_JSON_URL"
         env:
