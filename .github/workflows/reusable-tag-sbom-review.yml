@@ -56,15 +56,42 @@ jobs:
           npm ci
           npm run build
       
+      - name: Read version config
+        id: read-config
+        run: |
+          node .oss-management/dist/scripts/config-reader-cli.js
+        continue-on-error: true
+      
+      - name: Resolve previous version
+        id: resolve-version
+        run: |
+          node .oss-management/dist/scripts/version-resolver-cli.js \
+            "${{ github.event.repository.name }}" \
+            "${{ github.ref_name }}"
+        env:
+          DT_BASE_URL: ${{ secrets.DT_BASE_URL }}
+          DT_API_KEY: ${{ secrets.DT_API_KEY }}
+      
       - name: Get previous SBOM from Dependency-Track
         id: get-previous-sbom
         run: |
-          node .oss-management/dist/scripts/dt-client-cli.js get-sbom "${{ github.event.repository.name }}" "latest" previous-sbom.json || echo "No previous SBOM found"
-          if [ -f previous-sbom.json ]; then
-            echo "previous_sbom_exists=true" >> $GITHUB_OUTPUT
-          else
+          PREVIOUS_VERSION="${{ steps.resolve-version.outputs.previous_version }}"
+          IS_FIRST_VERSION="${{ steps.resolve-version.outputs.is_first_version }}"
+          
+          if [ "$IS_FIRST_VERSION" = "true" ]; then
+            echo "First version detected, using empty SBOM"
             echo "previous_sbom_exists=false" >> $GITHUB_OUTPUT
-            echo '{"bomFormat":"CycloneDX","specVersion":"1.4","components":[]}' > previous-sbom.json
+            echo '{"bomFormat":"CycloneDX","specVersion":"1.4","version":1,"components":[]}' > previous-sbom.json
+          else
+            echo "Retrieving SBOM for previous version: $PREVIOUS_VERSION"
+            if node .oss-management/dist/scripts/dt-client-cli.js get-sbom "${{ github.event.repository.name }}" "$PREVIOUS_VERSION" previous-sbom.json; then
+              echo "previous_sbom_exists=true" >> $GITHUB_OUTPUT
+              echo "Previous SBOM found for version: $PREVIOUS_VERSION"
+            else
+              echo "previous_sbom_exists=false" >> $GITHUB_OUTPUT
+              echo "No SBOM found in DT for version: $PREVIOUS_VERSION, using empty SBOM"
+              echo '{"bomFormat":"CycloneDX","specVersion":"1.4","version":1,"components":[]}' > previous-sbom.json
+            fi
           fi
         env:
           DT_BASE_URL: ${{ secrets.DT_BASE_URL }}

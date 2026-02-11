@@ -188,6 +188,7 @@ PR を作成すると、GHA により以下の処理が開始される:
 
 - 「承認」が OFF の場合、GHA はそのまま終了する
 - DT はプロジェクトのバージョンごとに SBOM を管理する
+- **{2/9追加}** DT に登録するときのバージョンは Git のタグと同じである
 - DT では、利用している OSS は、コンポーネントごとに管理されている
 - OSS ライセンスごとの対応は、対応するコンポーネントのプロパティとして登録する
 - DT に登録されているコンポーネントの ID は、sbom の components に含まれる情報 (group, name, vesion) を利用して絞り込む
@@ -202,12 +203,25 @@ PR を作成すると、GHA により以下の処理が開始される:
 - Syft の利用方法: SYFT+GRYPE.md
 - DT の Web API の利用方法: README.md
 
-### あとで対応する項目
+- **{2/9追加}** DT にから比較対象の SBOM が得られなければ、最初のバージョンである
+    - 最初のバージョンでは、全ての OSS は新規追加として扱う
 
-- 比較対象のバージョンの指定
-    - git describe --tags --abbrev=0 などで直近のタグを取得する
-    - あるいは GitHub Actions のコンテキストから latest release を取得するフローを定義しておく
-    - 今回は GH のラベルでする
+- **{2/9追加}** DT で管理するプロジェクトのバージョンは、GHA の呼び出し元のリポジトリのルートに存在する `oss-management-system.yml` で指定される
+    - 定義例:
+        ```
+        # ファイル名: oss-management-system.yml
+
+        # 差分比較時に DT から取得するプロジェクトバージョン
+        pre-project-version: v1.0.0       
+        ```
+    - 以下の場合は、最初のバージョンである
+        - oss-management-system.yml が存在しない
+        - oss-management-system.yml に `pre-project-version` キーが存在しない
+        - oss-management-system.yml に `pre-project-version` の値が存在しない
+
+- **{2/9追加}** GHA は他のリポジトリから呼び出されて利用される
+
+### あとで対応する項目
 
 - 「見直し」や「承認」のタスクのアサイン先の指定方法
     - GitHub Environments 機能の "Required reviewers" を利用する
