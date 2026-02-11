@@ -176,14 +176,31 @@ jobs:
           VERSION="${{ steps.extract-version.outputs.version }}"
           REVIEW_RESULTS_PATH="${{ steps.verify-artifacts.outputs.review_path }}"
           
+          echo "=========================================="
           echo "Setting component properties from review results..."
+          echo "Project: $PROJECT_NAME"
+          echo "Version: $VERSION"
+          echo "Review results file: $REVIEW_RESULTS_PATH"
+          echo "=========================================="
           
           # Parse JSON and iterate over results
           node -e "
             const fs = require('fs');
             const reviewResults = JSON.parse(fs.readFileSync('$REVIEW_RESULTS_PATH', 'utf-8'));
             
+            console.log('========================================');
+            console.log('Review results loaded');
+            console.log('Total results:', reviewResults.results.length);
+            console.log('========================================');
+            
             for (const result of reviewResults.results) {
+              console.log('');
+              console.log('------------------------------------------');
+              console.log('Processing component:', result.component.name);
+              console.log('Component details:', JSON.stringify(result.component, null, 2));
+              console.log('Actions:', JSON.stringify(result.actions, null, 2));
+              console.log('------------------------------------------');
+              
               const component = {
                 group: result.component.group,
                 name: result.component.name,
@@ -191,12 +208,16 @@ jobs:
               };
               
               // Set each action as a property
+              let propertyCount = 0;
               for (const [label, value] of Object.entries(result.actions)) {
                 const componentJson = JSON.stringify(component);
                 const propertyName = 'review_' + label.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
                 const propertyValue = value;
                 
-                console.log(\`Setting property \${propertyName} for component \${component.name}\`);
+                console.log('');
+                console.log(\`[Property \${++propertyCount}] Setting property: \${propertyName}\`);
+                console.log(\`  Value: \${propertyValue}\`);
+                console.log(\`  Component JSON: \${componentJson}\`);
                 
                 // Call dt-client-cli to set the property
                 const { execSync } = require('child_process');
@@ -205,14 +226,18 @@ jobs:
                     \`node .oss-management/dist/scripts/dt-client-cli.js set-property \"$PROJECT_NAME\" \"$VERSION\" '\${componentJson}' \"\${propertyName}\" \"\${propertyValue}\"\`,
                     { stdio: 'inherit' }
                   );
+                  console.log(\`  ✓ Property set successfully\`);
                 } catch (error) {
-                  console.error(\`Failed to set property for component \${component.name}: \${error.message}\`);
+                  console.error(\`  ✗ Failed to set property: \${error.message}\`);
                   // Continue with other components
                 }
               }
             }
             
-            console.log('All component properties set successfully');
+            console.log('');
+            console.log('========================================');
+            console.log('All component properties processing completed');
+            console.log('========================================');
           "
         env:
           DT_BASE_URL: ${{ secrets.DT_BASE_URL }}

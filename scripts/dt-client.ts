@@ -260,12 +260,26 @@ export async function findComponentUuid(
   projectUuid: string,
   component: Component
 ): Promise<string | null> {
+  console.log(`[findComponentUuid] Searching for component in project ${projectUuid}`);
+  console.log(`[findComponentUuid] Target component:`, JSON.stringify(component, null, 2));
+
   const components = await getComponents(projectUuid);
+  console.log(`[findComponentUuid] Total components in project: ${components.length}`);
 
   const match = components.find(
     (c) =>
       c.group === component.group && c.name === component.name && c.version === component.version
   );
+
+  if (match) {
+    console.log(`[findComponentUuid] Component found: ${match.uuid}`);
+  } else {
+    console.log(`[findComponentUuid] Component NOT found`);
+    console.log(`[findComponentUuid] Available components (first 5):`);
+    components.slice(0, 5).forEach((c, i) => {
+      console.log(`  ${i + 1}. group="${c.group}", name="${c.name}", version="${c.version}"`);
+    });
+  }
 
   return match?.uuid || null;
 }
@@ -280,6 +294,9 @@ export async function setComponentProperty(
   componentUuid: string,
   property: DTComponentProperty
 ): Promise<void> {
+  console.log(`[setComponentProperty] Component UUID: ${componentUuid}`);
+  console.log(`[setComponentProperty] Property:`, JSON.stringify(property, null, 2));
+
   const url = `${DT_BASE_URL}/api/v1/component/${componentUuid}/property`;
 
   const response = await fetchWithRetry(url, {
@@ -290,12 +307,16 @@ export async function setComponentProperty(
 
   if (!response.ok) {
     const body = await response.text();
+    console.error(`[setComponentProperty] ERROR: ${response.status} ${response.statusText}`);
+    console.error(`[setComponentProperty] Response body: ${body}`);
     throw new DTClientError(
       `Failed to set component property: ${response.statusText}`,
       response.status,
       body
     );
   }
+
+  console.log(`[setComponentProperty] Success`);
 }
 
 /**
@@ -312,17 +333,23 @@ export async function setComponentPropertyByComponent(
   propertyName: string,
   propertyValue: string
 ): Promise<void> {
+  console.log(`[setComponentPropertyByComponent] Starting...`);
+  console.log(`[setComponentPropertyByComponent] Project UUID: ${projectUuid}`);
+  console.log(`[setComponentPropertyByComponent] Property: ${propertyName} = ${propertyValue}`);
+
   const componentUuid = await findComponentUuid(projectUuid, component);
 
   if (!componentUuid) {
-    throw new DTClientError(
-      `Component not found: ${component.group || ''}:${component.name}:${component.version}`
-    );
+    const errorMsg = `Component not found: ${component.group || ''}:${component.name}:${component.version}`;
+    console.error(`[setComponentPropertyByComponent] ERROR: ${errorMsg}`);
+    throw new DTClientError(errorMsg);
   }
 
+  console.log(`[setComponentPropertyByComponent] Setting property on component ${componentUuid}`);
   await setComponentProperty(componentUuid, {
     propertyName,
     propertyValue,
     propertyType: 'STRING',
   });
+  console.log(`[setComponentPropertyByComponent] Property set successfully`);
 }
