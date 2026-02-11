@@ -111,7 +111,7 @@ jobs:
         if: steps.check-approval.outputs.approved == 'true'
         uses: actions/download-artifact@v4
         with:
-          name: review-results-tag-${{ steps.extract-version.outputs.version }}
+          name: review-results-${{ steps.extract-version.outputs.version }}
           run-id: ${{ steps.extract-run-ids.outputs.review_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: ./artifacts/review

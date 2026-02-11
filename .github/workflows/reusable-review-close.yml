@@ -88,7 +88,7 @@ jobs:
       - name: Upload review results as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: review-results-tag-${{ steps.extract-info.outputs.version }}
+          name: review-results-${{ steps.extract-info.outputs.version }}
           path: review-results.json
           retention-days: 90
       
