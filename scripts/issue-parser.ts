@@ -164,16 +164,19 @@ export function parseReviewIssue(
 
     // Find the component section in the issue body
     const componentName = comp.group ? `${comp.group}:${comp.name}` : comp.name;
+
+    // Match from ### ComponentName (License) until the next ### or ## heading, or end of string
     const sectionRegex = new RegExp(
-      `###\\s*${escapeRegex(componentName)}\\s*\\(${escapeRegex(comp.license)}\\)([\\s\\S]*?)(?=\\n###|\\n##|---)`
+      `###\\s*${escapeRegex(componentName)}\\s*\\(${escapeRegex(comp.license)}\\)([\\s\\S]*?)(?=\\n###\\s|\\n##\\s|$)`
     );
+
     const sectionMatch = issueBody.match(sectionRegex);
 
     if (sectionMatch) {
       const sectionContent = sectionMatch[1];
 
       // Parse all input fields in this section
-      // Look for headings followed by content
+      // Look for #### headings followed by content
       const fieldMatches = sectionContent.matchAll(/####\s*([^\n]+)\n+([\s\S]*?)(?=\n####|$)/g);
 
       for (const fieldMatch of fieldMatches) {
@@ -184,13 +187,29 @@ export function parseReviewIssue(
         if (fieldContent.includes('- [')) {
           const isChecked = parseCheckboxState(fieldContent, '対応済み');
           actions[fieldLabel] = isChecked ? '対応済み' : '未対応';
-        } else if (
-          fieldContent &&
-          fieldContent !== 'No response' &&
-          fieldContent !== '_No response_'
-        ) {
-          // It's a text or select field
-          actions[fieldLabel] = fieldContent;
+        } else {
+          // Extract content between INPUT_START and INPUT_END markers
+          const inputMatch = fieldContent.match(
+            /<!--\s*INPUT_START\s*-->([\s\S]*?)<!--\s*INPUT_END\s*-->/
+          );
+          if (inputMatch) {
+            let inputValue = inputMatch[1].trim();
+
+            // Remove placeholder text
+            if (
+              inputValue === '_対応内容を記入してください_' ||
+              inputValue === '_選択した内容を記入してください_' ||
+              inputValue === 'No response' ||
+              inputValue === '_No response_'
+            ) {
+              inputValue = '';
+            }
+
+            // Only add if there's actual content
+            if (inputValue) {
+              actions[fieldLabel] = inputValue;
+            }
+          }
         }
       }
     }

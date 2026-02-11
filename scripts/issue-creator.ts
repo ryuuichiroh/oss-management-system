@@ -126,19 +126,25 @@ export function generateReviewIssueMarkdown(
 
     // Add guidelines
     for (const guideline of guidelines) {
-      markdown += `**${guideline.label}**\n\n`;
+      markdown += `#### ${guideline.label}\n\n`;
       markdown += `${guideline.message}\n\n`;
 
       if (guideline.inputType === 'checkbox') {
         markdown += '- [ ] 対応済み\n\n';
       } else if (guideline.inputType === 'text') {
-        markdown += '```\n対応内容を記入してください\n```\n\n';
+        markdown += '**対応内容:**\n\n';
+        markdown += '<!-- INPUT_START -->\n';
+        markdown += '_対応内容を記入してください_\n';
+        markdown += '<!-- INPUT_END -->\n\n';
       } else if (guideline.inputType === 'select' && guideline.options) {
-        markdown += '選択肢:\n';
+        markdown += '**選択肢:**\n';
         for (const option of guideline.options) {
           markdown += `- ${option}\n`;
         }
-        markdown += '\n```\n選択した内容を記入してください\n```\n\n';
+        markdown += '\n**選択した内容:**\n\n';
+        markdown += '<!-- INPUT_START -->\n';
+        markdown += '_選択した内容を記入してください_\n';
+        markdown += '<!-- INPUT_END -->\n\n';
       }
     }
   }

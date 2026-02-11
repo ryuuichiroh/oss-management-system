@@ -207,18 +207,21 @@ describe('Issue Creator', () => {
       const result = generateReviewIssueMarkdown(diffs, guidelinesMap, sbomUrl);
       
       // Should have sections for each guideline type
-      expect(result).toContain('**Checkbox Label**');
+      expect(result).toContain('#### Checkbox Label');
       expect(result).toContain('Checkbox test message');
       expect(result).toContain('- [ ] 対応済み');
       
-      expect(result).toContain('**Text Label**');
+      expect(result).toContain('#### Text Label');
       expect(result).toContain('Text test message');
-      expect(result).toContain('対応内容を記入してください');
+      expect(result).toContain('<!-- INPUT_START -->');
+      expect(result).toContain('_対応内容を記入してください_');
+      expect(result).toContain('<!-- INPUT_END -->');
       
-      expect(result).toContain('**Select Label**');
+      expect(result).toContain('#### Select Label');
       expect(result).toContain('Select test message');
       expect(result).toContain('Option 1');
       expect(result).toContain('Option 2');
+      expect(result).toContain('_選択した内容を記入してください_');
     });
   });
 
