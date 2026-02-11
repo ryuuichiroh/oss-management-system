@@ -116,9 +116,28 @@ async function handleUploadSBOM(args: string[]) {
   const sbomPath = args[2];
 
   console.log(`Uploading SBOM for project: ${projectName} version: ${version}`);
+  console.log(`SBOM file path: ${sbomPath}`);
+
+  // Check if file exists
+  if (!fs.existsSync(sbomPath)) {
+    console.error(`ERROR: SBOM file not found: ${sbomPath}`);
+    process.exit(1);
+  }
+
+  // Get file stats
+  const stats = fs.statSync(sbomPath);
+  console.log(`SBOM file size: ${stats.size} bytes`);
 
   const sbomContent = fs.readFileSync(sbomPath, 'utf-8');
+  console.log(`SBOM content length: ${sbomContent.length} characters`);
+
   const sbom: SBOM = JSON.parse(sbomContent);
+
+  // Log SBOM metadata
+  console.log(`SBOM bomFormat: ${sbom.bomFormat}`);
+  console.log(`SBOM specVersion: ${sbom.specVersion}`);
+  console.log(`SBOM version: ${sbom.version || 'not set'}`);
+  console.log(`SBOM components: ${sbom.components?.length || 0}`);
 
   const projectUuid = await uploadSBOM(projectName, version, sbom);
 

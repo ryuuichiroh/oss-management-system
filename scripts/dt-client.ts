@@ -189,6 +189,10 @@ export async function uploadSBOM(
   const sbomJson = JSON.stringify(sbom);
   const sbomBase64 = Buffer.from(sbomJson).toString('base64');
 
+  console.log(`SBOM JSON length: ${sbomJson.length} characters`);
+  console.log(`SBOM base64 length: ${sbomBase64.length} characters`);
+  console.log(`SBOM JSON preview (first 200 chars): ${sbomJson.substring(0, 200)}`);
+
   const payload = {
     projectName,
     projectVersion: version,
