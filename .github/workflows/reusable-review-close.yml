@@ -48,7 +48,6 @@ jobs:
         id: extract-info
         run: |
           TITLE="${{ github.event.issue.title }}"
-          BODY="${{ github.event.issue.body }}"
           
           # Extract version from title like "[Review] OSS利用見直し v1.0.0"
           VERSION=$(echo "$TITLE" | sed -n 's/.*OSS利用見直し \(.*\)/\1/p' | xargs)
@@ -60,7 +59,7 @@ jobs:
           
           # Extract run ID from SBOM artifact URL in issue body
           # URL format: https://github.com/owner/repo/actions/runs/12345
-          RUN_ID=$(echo "$BODY" | grep -oP 'actions/runs/\K[0-9]+' | head -1)
+          RUN_ID=$(cat issue-body.txt | grep -oP 'actions/runs/\K[0-9]+' | head -1)
           if [ -z "$RUN_ID" ]; then
             RUN_ID="${{ github.run_id }}"
             echo "Could not extract run ID from issue, using current run ID"
