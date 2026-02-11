@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   process-approval:
-    uses: YOUR-ORG/log4j-vulnerable-sample/.github/workflows/reusable-approval-close.yml@main
+    uses: ryuuichiroh/oss-management-system/.github/workflows/reusable-approval-close.yml@main
     with:
       # オプション: Node.jsバージョンを指定する場合
       # node-version: '20'

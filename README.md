@@ -458,7 +458,7 @@ permissions:
 
 jobs:
   sbom-check:
-    uses: your-org/log4j-vulnerable-sample/.github/workflows/reusable-pr-sbom-check.yml@main
+    uses: ryuuichiroh/oss-management-system/.github/workflows/reusable-pr-sbom-check.yml@main
     secrets:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```

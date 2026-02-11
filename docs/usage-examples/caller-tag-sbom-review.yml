@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   sbom-review:
-    uses: YOUR-ORG/log4j-vulnerable-sample/.github/workflows/reusable-tag-sbom-review.yml@main
+    uses: ryuuichiroh/oss-management-system/.github/workflows/reusable-tag-sbom-review.yml@main
     with:
       # オプション: カスタムライセンスガイドラインを使用する場合
       # license-guidelines-path: 'config/my-license-guidelines.yml'

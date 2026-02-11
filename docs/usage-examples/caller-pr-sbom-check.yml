@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   sbom-check:
-    uses: YOUR-ORG/log4j-vulnerable-sample/.github/workflows/reusable-pr-sbom-check.yml@main
+    uses: ryuuichiroh/oss-management-system/.github/workflows/reusable-pr-sbom-check.yml@main
     with:
       # オプション: カスタムライセンスガイドラインを使用する場合
       # license-guidelines-path: 'config/my-license-guidelines.yml'

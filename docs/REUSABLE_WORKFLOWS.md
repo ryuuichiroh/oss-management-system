@@ -27,7 +27,7 @@ Organization管理者が以下の設定を行う必要があります:
 
 ### 2. リポジトリアクセス権限
 
-呼び出し元のリポジトリが、このリポジトリ（log4j-vulnerable-sample）にアクセスできる必要があります:
+呼び出し元のリポジトリが、このリポジトリにアクセスできる必要があります:
 
 - 同じOrganization内のプライベートリポジトリであれば、デフォルトで`GITHUB_TOKEN`を使用してアクセス可能
 - 異なるOrganizationの場合は、Personal Access Token (PAT) が必要
@@ -120,25 +120,13 @@ exclude:
 mkdir -p .github/workflows
 
 # 必要なワークフローをコピー（例）
-cp /path/to/log4j-vulnerable-sample/docs/usage-examples/caller-pr-sbom-check.yml .github/workflows/pr-sbom-check.yml
-cp /path/to/log4j-vulnerable-sample/docs/usage-examples/caller-tag-sbom-review.yml .github/workflows/tag-sbom-review.yml
-cp /path/to/log4j-vulnerable-sample/docs/usage-examples/caller-review-close.yml .github/workflows/review-close.yml
-cp /path/to/log4j-vulnerable-sample/docs/usage-examples/caller-approval-close.yml .github/workflows/approval-close.yml
+cp ~/oss-management-system/docs/usage-examples/caller-pr-sbom-check.yml .github/workflows/pr-sbom-check.yml
+cp ~/oss-management-system/docs/usage-examples/caller-tag-sbom-review.yml .github/workflows/tag-sbom-review.yml
+cp ~/oss-management-system/docs/usage-examples/caller-review-close.yml .github/workflows/review-close.yml
+cp ~/oss-management-system/docs/usage-examples/caller-approval-close.yml .github/workflows/approval-close.yml
 ```
 
-### ステップ2: Organization名を修正
-
-コピーしたファイル内の `YOUR-ORG` を実際のOrganization名に置き換えます:
-
-```yaml
-# 修正前
-uses: YOUR-ORG/log4j-vulnerable-sample/.github/workflows/reusable-pr-sbom-check.yml@main
-
-# 修正後（例: organizationが "my-company" の場合）
-uses: my-company/log4j-vulnerable-sample/.github/workflows/reusable-pr-sbom-check.yml@main
-```
-
-### ステップ3: Secretsを設定
+### ステップ2: Secretsを設定
 
 あなたのプロジェクトのリポジトリ設定で、以下のSecretsを追加します:
 
@@ -152,7 +140,7 @@ uses: my-company/log4j-vulnerable-sample/.github/workflows/reusable-pr-sbom-chec
 - `DT_BASE_URL`: Dependency-TrackのベースURL
 - `DT_API_KEY`: Dependency-TrackのAPIキー
 
-### ステップ4: カスタマイズ（オプション）
+### ステップ3: カスタマイズ（オプション）
 
 #### カスタムライセンスガイドラインを使用する場合
 
@@ -162,21 +150,21 @@ uses: my-company/log4j-vulnerable-sample/.github/workflows/reusable-pr-sbom-chec
 ```yaml
 jobs:
   sbom-check:
-    uses: my-company/log4j-vulnerable-sample/.github/workflows/reusable-pr-sbom-check.yml@main
+    uses: ryuuichiroh/oss-management-system/.github/workflows/reusable-pr-sbom-check.yml@main
     with:
       license-guidelines-path: 'config/my-custom-guidelines.yml'  # カスタムパスを指定
     secrets:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-指定しない場合は、log4j-vulnerable-sampleリポジトリのデフォルトガイドラインが使用されます。
+指定しない場合は、本リポジトリのデフォルトガイドラインが使用されます。
 
 #### Node.jsバージョンを変更する場合
 
 ```yaml
 jobs:
   sbom-check:
-    uses: my-company/log4j-vulnerable-sample/.github/workflows/reusable-pr-sbom-check.yml@main
+    uses: ryuuichiroh/oss-management-system/.github/workflows/reusable-pr-sbom-check.yml@main
     with:
       node-version: '18'  # Node.js 18を使用
     secrets:
@@ -200,7 +188,7 @@ permissions:
 
 jobs:
   sbom-check:
-    uses: my-company/log4j-vulnerable-sample/.github/workflows/reusable-pr-sbom-check.yml@main
+    uses: ryuuichiroh/oss-management-system/.github/workflows/reusable-pr-sbom-check.yml@main
     secrets:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -223,7 +211,7 @@ permissions:
 
 jobs:
   sbom-check:
-    uses: my-company/log4j-vulnerable-sample/.github/workflows/reusable-pr-sbom-check.yml@main
+    uses: ryuuichiroh/oss-management-system/.github/workflows/reusable-pr-sbom-check.yml@main
     with:
       license-guidelines-path: 'config/my-license-guidelines.yml'
       node-version: '20'
@@ -239,13 +227,13 @@ jobs:
 
 ```yaml
 # mainブランチの最新版を使用（推奨）
-uses: my-company/log4j-vulnerable-sample/.github/workflows/reusable-pr-sbom-check.yml@main
+uses: ryuuichiroh/oss-management-system/.github/workflows/reusable-pr-sbom-check.yml@main
 
 # 特定のタグを使用（安定版）
-uses: my-company/log4j-vulnerable-sample/.github/workflows/reusable-pr-sbom-check.yml@v1.0.0
+uses: ryuuichiroh/oss-management-system/.github/workflows/reusable-pr-sbom-check.yml@v1.0.0
 
 # 特定のコミットを使用（最も安全）
-uses: my-company/log4j-vulnerable-sample/.github/workflows/reusable-pr-sbom-check.yml@abc123def456
+uses: ryuuichiroh/oss-management-system/.github/workflows/reusable-pr-sbom-check.yml@abc123def456
 ```
 
 **推奨**: 開発中は `@main` を使用し、本番環境では特定のタグやコミットSHAを使用してください。
@@ -270,7 +258,7 @@ uses: my-company/log4j-vulnerable-sample/.github/workflows/reusable-pr-sbom-chec
 
 ### エラー: "Repository not found"
 
-**原因**: 呼び出し元のリポジトリが、log4j-vulnerable-sampleリポジトリにアクセスできません。
+**原因**: 呼び出し元のリポジトリが、本リポジトリにアクセスできません。
 
 **解決策**:
 1. 両方のリポジトリが同じOrganization内にあることを確認
@@ -290,7 +278,7 @@ uses: my-company/log4j-vulnerable-sample/.github/workflows/reusable-pr-sbom-chec
 
 ### ワークフローの更新
 
-log4j-vulnerable-sampleリポジトリのワークフローを更新すると、`@main`を参照している全プロジェクトに自動的に反映されます。
+本リポジトリのワークフローを更新すると、`@main`を参照している全プロジェクトに自動的に反映されます。
 
 ### 変更の通知
 
@@ -302,7 +290,7 @@ log4j-vulnerable-sampleリポジトリのワークフローを更新すると、
 
 ## サポート
 
-問題が発生した場合は、log4j-vulnerable-sampleリポジトリにIssueを作成してください。
+問題が発生した場合は、本リポジトリにIssueを作成してください。
 
 ## 参考リンク
 
