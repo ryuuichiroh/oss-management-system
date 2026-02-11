@@ -42,7 +42,7 @@ async function resolvePreviousVersion(configResult, projectName, _currentVersion
             previousVersion: null,
             isFirstVersion: true,
             source: 'first-version',
-            reason: 'Config file not found or invalid'
+            reason: 'Config file not found or invalid',
         };
     }
     // Case 2: Config file exists but pre-project-version is missing or empty
@@ -53,7 +53,7 @@ async function resolvePreviousVersion(configResult, projectName, _currentVersion
             previousVersion: null,
             isFirstVersion: true,
             source: 'first-version',
-            reason: 'pre-project-version is empty'
+            reason: 'pre-project-version is empty',
         };
     }
     // Case 3: Valid pre-project-version exists, check if SBOM exists in DT
@@ -67,7 +67,7 @@ async function resolvePreviousVersion(configResult, projectName, _currentVersion
                 previousVersion: null,
                 isFirstVersion: true,
                 source: 'dt-not-found',
-                reason: 'SBOM not found in DT'
+                reason: 'SBOM not found in DT',
             };
         }
         // SBOM found successfully
@@ -75,7 +75,7 @@ async function resolvePreviousVersion(configResult, projectName, _currentVersion
         return {
             previousVersion: preProjectVersion,
             isFirstVersion: false,
-            source: 'config-file'
+            source: 'config-file',
         };
     }
     catch (error) {
@@ -87,7 +87,7 @@ async function resolvePreviousVersion(configResult, projectName, _currentVersion
             previousVersion: null,
             isFirstVersion: true,
             source: 'dt-not-found',
-            reason: `DT API error: ${errorMessage}`
+            reason: `DT API error: ${errorMessage}`,
         };
     }
 }

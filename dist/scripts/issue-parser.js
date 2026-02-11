@@ -67,7 +67,10 @@ function escapeRegex(str) {
 }
 function parseComponentFromTable(tableRow) {
     // Split by pipe and extract fields
-    const parts = tableRow.split('|').map(p => p.trim()).filter(p => p);
+    const parts = tableRow
+        .split('|')
+        .map((p) => p.trim())
+        .filter((p) => p);
     if (parts.length < 4) {
         return null;
     }
@@ -114,7 +117,7 @@ function parseComponentFromTable(tableRow) {
         name,
         version,
         license,
-        changeType
+        changeType,
     };
 }
 /**
@@ -127,7 +130,10 @@ function parseComponentsFromTable(issueBody) {
     let inTable = false;
     for (const line of lines) {
         // Check if this is the table header
-        if (line.includes('変更') && line.includes('OSS名') && line.includes('バージョン') && line.includes('ライセンス')) {
+        if (line.includes('変更') &&
+            line.includes('OSS名') &&
+            line.includes('バージョン') &&
+            line.includes('ライセンス')) {
             inTable = true;
             continue;
         }
@@ -174,7 +180,9 @@ function parseReviewIssue(issueBody, reviewer, version) {
                     const isChecked = parseCheckboxState(fieldContent, '対応済み');
                     actions[fieldLabel] = isChecked ? '対応済み' : '未対応';
                 }
-                else if (fieldContent && fieldContent !== 'No response' && fieldContent !== '_No response_') {
+                else if (fieldContent &&
+                    fieldContent !== 'No response' &&
+                    fieldContent !== '_No response_') {
                     // It's a text or select field
                     actions[fieldLabel] = fieldContent;
                 }
@@ -184,17 +192,17 @@ function parseReviewIssue(issueBody, reviewer, version) {
             component: {
                 group: comp.group,
                 name: comp.name,
-                version: comp.version
+                version: comp.version,
             },
             license: comp.license,
-            actions
+            actions,
         });
     }
     return {
         version,
         reviewedAt: new Date().toISOString(),
         reviewer,
-        results
+        results,
     };
 }
 /**

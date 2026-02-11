@@ -2,7 +2,7 @@
  * Core type definitions for OSS Management System
  */
 export interface SBOM {
-    bomFormat: "CycloneDX";
+    bomFormat: 'CycloneDX';
     specVersion: string;
     serialNumber?: string;
     version?: number;
@@ -20,7 +20,7 @@ export interface Tool {
     version?: string;
 }
 export interface Component {
-    type: "library" | "application" | "framework" | "container" | "file";
+    type: 'library' | 'application' | 'framework' | 'container' | 'file';
     group?: string;
     name: string;
     version: string;
@@ -40,7 +40,7 @@ export interface Hash {
     alg: string;
     content: string;
 }
-export type ChangeType = "added" | "updated" | "removed";
+export type ChangeType = 'added' | 'updated' | 'removed';
 export interface ComponentDiff {
     changeType: ChangeType;
     component: Component;
@@ -56,10 +56,10 @@ export interface DiffResult {
 }
 export interface ComponentContext {
     isModified?: boolean;
-    linkType?: "static" | "dynamic";
+    linkType?: 'static' | 'dynamic';
     isDistributed?: boolean;
 }
-export type InputType = "checkbox" | "text" | "select";
+export type InputType = 'checkbox' | 'text' | 'select';
 export interface Guideline {
     condition: string;
     message: string;
@@ -118,7 +118,7 @@ export interface DTComponentProperty {
     groupName?: string;
     propertyName: string;
     propertyValue: string;
-    propertyType?: "STRING" | "INTEGER" | "BOOLEAN" | "NUMBER";
+    propertyType?: 'STRING' | 'INTEGER' | 'BOOLEAN' | 'NUMBER';
 }
 /**
  * Configuration file structure for oss-management-system.yml

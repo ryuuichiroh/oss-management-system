@@ -20,8 +20,8 @@ exports.setComponentPropertyByComponent = setComponentPropertyByComponent;
 // ============================================================================
 // Configuration
 // ============================================================================
-const DT_BASE_URL = process.env.DT_BASE_URL || "http://localhost:8081";
-const DT_API_KEY = process.env.DT_API_KEY || "";
+const DT_BASE_URL = process.env.DT_BASE_URL || 'http://localhost:8081';
+const DT_API_KEY = process.env.DT_API_KEY || '';
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000;
 // ============================================================================
@@ -32,7 +32,7 @@ class DTClientError extends Error {
         super(message);
         this.statusCode = statusCode;
         this.responseBody = responseBody;
-        this.name = "DTClientError";
+        this.name = 'DTClientError';
     }
 }
 exports.DTClientError = DTClientError;
@@ -76,15 +76,15 @@ async function fetchWithRetry(url, options, retries = MAX_RETRIES) {
             }
         }
     }
-    throw new DTClientError(`Failed after ${retries} retries: ${lastError?.message || "Unknown error"}`);
+    throw new DTClientError(`Failed after ${retries} retries: ${lastError?.message || 'Unknown error'}`);
 }
 /**
  * Get common headers for DT API requests
  */
 function getHeaders() {
     return {
-        "Content-Type": "application/json",
-        "X-Api-Key": DT_API_KEY,
+        'Content-Type': 'application/json',
+        'X-Api-Key': DT_API_KEY,
     };
 }
 // ============================================================================
@@ -96,7 +96,7 @@ function getHeaders() {
 async function getProject(projectName, version) {
     const url = `${DT_BASE_URL}/api/v1/project/lookup?name=${encodeURIComponent(projectName)}&version=${encodeURIComponent(version)}`;
     const response = await fetchWithRetry(url, {
-        method: "GET",
+        method: 'GET',
         headers: getHeaders(),
     });
     if (response.status === 404) {
@@ -123,7 +123,7 @@ async function getSBOM(projectName, version) {
     }
     const url = `${DT_BASE_URL}/api/v1/bom/cyclonedx/project/${project.uuid}`;
     const response = await fetchWithRetry(url, {
-        method: "GET",
+        method: 'GET',
         headers: getHeaders(),
     });
     if (response.status === 404) {
@@ -147,7 +147,7 @@ async function uploadSBOM(projectName, version, sbom) {
     const url = `${DT_BASE_URL}/api/v1/bom`;
     // Encode SBOM as base64
     const sbomJson = JSON.stringify(sbom);
-    const sbomBase64 = Buffer.from(sbomJson).toString("base64");
+    const sbomBase64 = Buffer.from(sbomJson).toString('base64');
     const payload = {
         projectName,
         projectVersion: version,
@@ -155,7 +155,7 @@ async function uploadSBOM(projectName, version, sbom) {
         bom: sbomBase64,
     };
     const response = await fetchWithRetry(url, {
-        method: "PUT",
+        method: 'PUT',
         headers: getHeaders(),
         body: JSON.stringify(payload),
     });
@@ -168,7 +168,7 @@ async function uploadSBOM(projectName, version, sbom) {
     await sleep(2000); // Give DT time to process
     const project = await getProject(projectName, version);
     if (!project) {
-        throw new DTClientError("Project not found after SBOM upload");
+        throw new DTClientError('Project not found after SBOM upload');
     }
     return project.uuid;
 }
@@ -181,7 +181,7 @@ async function uploadSBOM(projectName, version, sbom) {
 async function getComponents(projectUuid) {
     const url = `${DT_BASE_URL}/api/v1/component/project/${projectUuid}`;
     const response = await fetchWithRetry(url, {
-        method: "GET",
+        method: 'GET',
         headers: getHeaders(),
     });
     if (!response.ok) {
@@ -199,9 +199,7 @@ async function getComponents(projectUuid) {
  */
 async function findComponentUuid(projectUuid, component) {
     const components = await getComponents(projectUuid);
-    const match = components.find((c) => c.group === component.group &&
-        c.name === component.name &&
-        c.version === component.version);
+    const match = components.find((c) => c.group === component.group && c.name === component.name && c.version === component.version);
     return match?.uuid || null;
 }
 /**
@@ -213,7 +211,7 @@ async function findComponentUuid(projectUuid, component) {
 async function setComponentProperty(componentUuid, property) {
     const url = `${DT_BASE_URL}/api/v1/component/${componentUuid}/property`;
     const response = await fetchWithRetry(url, {
-        method: "PUT",
+        method: 'PUT',
         headers: getHeaders(),
         body: JSON.stringify(property),
     });
@@ -233,12 +231,12 @@ async function setComponentProperty(componentUuid, property) {
 async function setComponentPropertyByComponent(projectUuid, component, propertyName, propertyValue) {
     const componentUuid = await findComponentUuid(projectUuid, component);
     if (!componentUuid) {
-        throw new DTClientError(`Component not found: ${component.group || ""}:${component.name}:${component.version}`);
+        throw new DTClientError(`Component not found: ${component.group || ''}:${component.name}:${component.version}`);
     }
     await setComponentProperty(componentUuid, {
         propertyName,
         propertyValue,
-        propertyType: "STRING",
+        propertyType: 'STRING',
     });
 }
 //# sourceMappingURL=dt-client.js.map

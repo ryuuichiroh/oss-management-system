@@ -42,6 +42,7 @@ jobs:
         run: |
           cd .oss-management
           npm ci
+          npm run lint
           npm run build
       
       - name: Save issue body to file

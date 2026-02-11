@@ -93,7 +93,7 @@ function readConfig(repoRoot) {
         return {
             success: false,
             error: 'File not found',
-            filePath: configPath
+            filePath: configPath,
         };
     }
     try {
@@ -110,19 +110,19 @@ function readConfig(repoRoot) {
             return {
                 success: false,
                 error: 'Invalid YAML: Expected an object',
-                filePath: configPath
+                filePath: configPath,
             };
         }
         // Extract config with proper typing
         const config = {
-            preProjectVersion: parsedData['pre-project-version']
+            preProjectVersion: parsedData['pre-project-version'],
         };
         log(LogLevel.INFO, `Config file found: ${configPath}`);
         log(LogLevel.INFO, `pre-project-version: ${config.preProjectVersion || '(not set)'}`);
         return {
             success: true,
             config,
-            filePath: configPath
+            filePath: configPath,
         };
     }
     catch (error) {
@@ -135,7 +135,7 @@ function readConfig(repoRoot) {
             return {
                 success: false,
                 error: `Invalid YAML: ${error.message}`,
-                filePath: configPath
+                filePath: configPath,
             };
         }
         // Handle read errors
@@ -145,7 +145,7 @@ function readConfig(repoRoot) {
             return {
                 success: false,
                 error: `Read error: ${error.message}`,
-                filePath: configPath
+                filePath: configPath,
             };
         }
         // Handle unknown errors
@@ -154,7 +154,7 @@ function readConfig(repoRoot) {
         return {
             success: false,
             error: 'Unknown error occurred',
-            filePath: configPath
+            filePath: configPath,
         };
     }
 }

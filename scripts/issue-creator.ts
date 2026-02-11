@@ -1,22 +1,17 @@
 #!/usr/bin/env node
 /**
  * Issue Creator
- * 
+ *
  * Creates GitHub Issues for OSS review and approval workflows.
  * - Review Issue: YAML form with component diffs and license guidelines
  * - Approval Issue: Markdown with review results
- * 
+ *
  * Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 6.2, 6.3, 6.4
  */
 
 import * as fs from 'fs';
 import * as github from '@actions/github';
-import {
-  ComponentDiff,
-  Guideline,
-  ReviewResult,
-  Component
-} from './types';
+import { ComponentDiff, Guideline, ReviewResult, Component } from './types';
 
 /**
  * Get the primary license ID from a component
@@ -27,22 +22,22 @@ function getLicenseId(component: Component): string {
   }
 
   const firstLicense = component.licenses[0];
-  
+
   // Check for SPDX expression first
   if (firstLicense.expression) {
     return firstLicense.expression;
   }
-  
+
   // Check for license ID
   if (firstLicense.license?.id) {
     return firstLicense.license.id;
   }
-  
+
   // Check for license name
   if (firstLicense.license?.name) {
     return firstLicense.license.name;
   }
-  
+
   return 'Unknown';
 }
 
@@ -53,10 +48,7 @@ function escapeMarkdown(text: string | undefined | null): string {
   if (text === undefined || text === null) {
     return '';
   }
-  return text
-    .replace(/\|/g, '\\|')
-    .replace(/\n/g, ' ')
-    .replace(/\r/g, '');
+  return text.replace(/\|/g, '\\|').replace(/\n/g, ' ').replace(/\r/g, '');
 }
 
 /**
@@ -79,7 +71,6 @@ function getChangeEmoji(changeType: string): string {
  * Generate Review Issue (Markdown)
  */
 export function generateReviewIssueMarkdown(
-  version: string,
   diffs: ComponentDiff[],
   guidelinesMap: Map<string, Guideline[]>,
   sbomArtifactUrl: string
@@ -93,20 +84,20 @@ export function generateReviewIssueMarkdown(
   // Add component diff table
   markdown += '| 変更 | OSS名 | バージョン | ライセンス |\n';
   markdown += '|------|-------|-----------|----------|\n';
-  
+
   for (const diff of diffs) {
     const emoji = getChangeEmoji(diff.changeType);
     const componentName = escapeMarkdown(diff.component.name);
     const group = diff.component.group ? escapeMarkdown(diff.component.group) : '';
     const fullName = group ? `${group}:${componentName}` : componentName;
-    
+
     let versionDisplay = escapeMarkdown(diff.component.version);
     if (diff.changeType === 'updated' && diff.previousVersion) {
       versionDisplay = `${escapeMarkdown(diff.previousVersion)} → ${versionDisplay}`;
     }
-    
+
     const licenseId = escapeMarkdown(getLicenseId(diff.component));
-    
+
     markdown += `| ${emoji} | ${fullName} | ${versionDisplay} | ${licenseId} |\n`;
   }
 
@@ -121,23 +112,23 @@ export function generateReviewIssueMarkdown(
   for (const diff of diffs) {
     const licenseId = getLicenseId(diff.component);
     const guidelines = guidelinesMap.get(licenseId) || [];
-    
+
     if (guidelines.length === 0) {
       continue;
     }
 
     // Add section header
-    const componentName = diff.component.group 
+    const componentName = diff.component.group
       ? `${diff.component.group}:${diff.component.name}`
       : diff.component.name;
-    
+
     markdown += `### ${escapeMarkdown(componentName)} (${escapeMarkdown(licenseId)})\n\n`;
 
     // Add guidelines
     for (const guideline of guidelines) {
       markdown += `**${guideline.label}**\n\n`;
       markdown += `${guideline.message}\n\n`;
-      
+
       if (guideline.inputType === 'checkbox') {
         markdown += '- [ ] 対応済み\n\n';
       } else if (guideline.inputType === 'text') {
@@ -175,36 +166,36 @@ export function generateApprovalIssue(
   let markdown = `## ✅ OSS利用承認タスク\n\n`;
   markdown += `リリースバージョン: **${version}**\n\n`;
   markdown += `見直し担当者による確認が完了しました。以下の内容を確認し、承認してください。\n\n`;
-  
+
   // Add review results table
   markdown += `### 見直し結果一覧\n\n`;
   markdown += `| OSS名 | バージョン | ライセンス | 対応状況 |\n`;
   markdown += `|-------|-----------|-----------|----------|\n`;
-  
+
   for (const result of reviewResults) {
-    const componentName = result.component.group 
+    const componentName = result.component.group
       ? `${escapeMarkdown(result.component.group)}:${escapeMarkdown(result.component.name)}`
       : escapeMarkdown(result.component.name);
     const version = escapeMarkdown(result.component.version);
     const license = escapeMarkdown(result.license);
-    
+
     // Summarize actions
     const actionCount = Object.keys(result.actions).length;
     const actionSummary = actionCount > 0 ? `${actionCount}件の対応` : '対応なし';
-    
+
     markdown += `| ${componentName} | ${version} | ${license} | ${actionSummary} |\n`;
   }
-  
+
   // Add detailed review results
   markdown += `\n### 詳細な見直し結果\n\n`;
-  
+
   for (const result of reviewResults) {
-    const componentName = result.component.group 
+    const componentName = result.component.group
       ? `${result.component.group}:${result.component.name}`
       : result.component.name;
-    
+
     markdown += `#### ${escapeMarkdown(componentName)} (${escapeMarkdown(result.license)})\n\n`;
-    
+
     if (Object.keys(result.actions).length === 0) {
       markdown += `対応事項なし\n\n`;
     } else {
@@ -214,16 +205,16 @@ export function generateApprovalIssue(
       markdown += `\n`;
     }
   }
-  
+
   // Add artifact links
   markdown += `---\n\n`;
   markdown += `📦 [SBOM をダウンロード](${sbomArtifactUrl})\n\n`;
   markdown += `📄 [見直し結果JSON をダウンロード](${reviewResultsArtifactUrl})\n\n`;
-  
+
   // Add approval checkbox
   markdown += `### 承認\n\n`;
   markdown += `- [ ] 上記の内容を確認し、Dependency-Trackへの登録を承認します\n`;
-  
+
   return markdown;
 }
 
@@ -251,7 +242,7 @@ export async function createGitHubIssue(
       title,
       body,
       labels,
-      assignees: assignees || []
+      assignees: assignees || [],
     });
 
     console.log(`Issue created successfully: #${response.data.number}`);
@@ -269,11 +260,15 @@ export async function createGitHubIssue(
  */
 async function main() {
   const args = process.argv.slice(2);
-  
+
   if (args.length < 1) {
     console.error('Usage:');
-    console.error('  Review Issue: node issue-creator.js review <version> <diff-result.json> <sbom-url> <guidelines-yaml> [assignee]');
-    console.error('  Approval Issue: node issue-creator.js approval <version> <review-results.json> <sbom-url> <review-json-url> [assignee]');
+    console.error(
+      '  Review Issue: node issue-creator.js review <version> <diff-result.json> <sbom-url> <guidelines-yaml> [assignee]'
+    );
+    console.error(
+      '  Approval Issue: node issue-creator.js approval <version> <review-results.json> <sbom-url> <review-json-url> [assignee]'
+    );
     process.exit(1);
   }
 
@@ -302,7 +297,7 @@ async function main() {
       const { LicenseGuideProvider } = await import('./license-guide-provider');
       const guideProvider = new LicenseGuideProvider(guidelinesYamlPath);
       guideProvider.loadConfig();
-      
+
       const guidelinesMap = new Map<string, Guideline[]>();
       for (const diff of diffs) {
         const licenseId = getLicenseId(diff.component);
@@ -311,8 +306,8 @@ async function main() {
       }
 
       // Generate issue markdown
-      const issueMarkdown = generateReviewIssueMarkdown(version, diffs, guidelinesMap, sbomUrl);
-      
+      const issueMarkdown = generateReviewIssueMarkdown(diffs, guidelinesMap, sbomUrl);
+
       // Output to file for inspection
       fs.writeFileSync('review-issue.md', issueMarkdown, 'utf-8');
       console.log('Review issue markdown generated: review-issue.md');
@@ -328,7 +323,6 @@ async function main() {
         );
         console.log(`Review issue created: #${issueNumber}`);
       }
-
     } else if (command === 'approval') {
       // Create approval issue
       if (args.length < 5) {
@@ -349,7 +343,7 @@ async function main() {
 
       // Generate approval issue
       const issueMarkdown = generateApprovalIssue(version, reviewResults, sbomUrl, reviewJsonUrl);
-      
+
       // Output to file for inspection
       fs.writeFileSync('approval-issue.md', issueMarkdown, 'utf-8');
       console.log('Approval issue generated: approval-issue.md');
@@ -365,12 +359,10 @@ async function main() {
         );
         console.log(`Approval issue created: #${issueNumber}`);
       }
-
     } else {
       console.error(`Unknown command: ${command}`);
       process.exit(1);
     }
-
   } catch (error) {
     console.error('Error:', error);
     process.exit(1);

@@ -102,10 +102,7 @@ function escapeMarkdown(text) {
     if (!text) {
         return '';
     }
-    return text
-        .replace(/\|/g, '\\|')
-        .replace(/\n/g, ' ')
-        .replace(/\r/g, '');
+    return text.replace(/\|/g, '\\|').replace(/\n/g, ' ').replace(/\r/g, '');
 }
 /**
  * Generate Markdown comment from diff list and guidelines
@@ -171,7 +168,7 @@ async function postComment(prNumber, comment, token, repository) {
             owner,
             repo,
             issue_number: prNumber,
-            body: comment
+            body: comment,
         });
         console.log(`Comment posted successfully to PR #${prNumber}`);
     }

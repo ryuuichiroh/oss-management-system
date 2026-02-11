@@ -1,6 +1,6 @@
 /**
  * Dependency-Track API Client
- * 
+ *
  * Provides functions to interact with Dependency-Track API:
  * - Get SBOM from a project
  * - Upload SBOM to create/update a project
@@ -8,20 +8,14 @@
  * - Set component properties
  */
 
-import {
-  SBOM,
-  DTProject,
-  DTComponent,
-  DTComponentProperty,
-  Component,
-} from "./types";
+import { SBOM, DTProject, DTComponent, DTComponentProperty, Component } from './types';
 
 // ============================================================================
 // Configuration
 // ============================================================================
 
-const DT_BASE_URL = process.env.DT_BASE_URL || "http://localhost:8081";
-const DT_API_KEY = process.env.DT_API_KEY || "";
+const DT_BASE_URL = process.env.DT_BASE_URL || 'http://localhost:8081';
+const DT_API_KEY = process.env.DT_API_KEY || '';
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000;
 
@@ -36,7 +30,7 @@ export class DTClientError extends Error {
     public responseBody?: string
   ) {
     super(message);
-    this.name = "DTClientError";
+    this.name = 'DTClientError';
   }
 }
 
@@ -95,7 +89,7 @@ async function fetchWithRetry(
   }
 
   throw new DTClientError(
-    `Failed after ${retries} retries: ${lastError?.message || "Unknown error"}`
+    `Failed after ${retries} retries: ${lastError?.message || 'Unknown error'}`
   );
 }
 
@@ -104,8 +98,8 @@ async function fetchWithRetry(
  */
 function getHeaders(): Record<string, string> {
   return {
-    "Content-Type": "application/json",
-    "X-Api-Key": DT_API_KEY,
+    'Content-Type': 'application/json',
+    'X-Api-Key': DT_API_KEY,
   };
 }
 
@@ -116,14 +110,11 @@ function getHeaders(): Record<string, string> {
 /**
  * Get project by name and version
  */
-export async function getProject(
-  projectName: string,
-  version: string
-): Promise<DTProject | null> {
+export async function getProject(projectName: string, version: string): Promise<DTProject | null> {
   const url = `${DT_BASE_URL}/api/v1/project/lookup?name=${encodeURIComponent(projectName)}&version=${encodeURIComponent(version)}`;
 
   const response = await fetchWithRetry(url, {
-    method: "GET",
+    method: 'GET',
     headers: getHeaders(),
   });
 
@@ -133,11 +124,7 @@ export async function getProject(
 
   if (!response.ok) {
     const body = await response.text();
-    throw new DTClientError(
-      `Failed to get project: ${response.statusText}`,
-      response.status,
-      body
-    );
+    throw new DTClientError(`Failed to get project: ${response.statusText}`, response.status, body);
   }
 
   return (await response.json()) as DTProject;
@@ -145,15 +132,12 @@ export async function getProject(
 
 /**
  * Get SBOM from a project
- * 
+ *
  * @param projectName - Project name
  * @param version - Project version
  * @returns SBOM in CycloneDX format, or null if project not found
  */
-export async function getSBOM(
-  projectName: string,
-  version: string
-): Promise<SBOM | null> {
+export async function getSBOM(projectName: string, version: string): Promise<SBOM | null> {
   // First, get the project UUID
   const project = await getProject(projectName, version);
   if (!project) {
@@ -163,7 +147,7 @@ export async function getSBOM(
   const url = `${DT_BASE_URL}/api/v1/bom/cyclonedx/project/${project.uuid}`;
 
   const response = await fetchWithRetry(url, {
-    method: "GET",
+    method: 'GET',
     headers: getHeaders(),
   });
 
@@ -173,11 +157,7 @@ export async function getSBOM(
 
   if (!response.ok) {
     const body = await response.text();
-    throw new DTClientError(
-      `Failed to get SBOM: ${response.statusText}`,
-      response.status,
-      body
-    );
+    throw new DTClientError(`Failed to get SBOM: ${response.statusText}`, response.status, body);
   }
 
   return (await response.json()) as SBOM;
@@ -185,7 +165,7 @@ export async function getSBOM(
 
 /**
  * Upload SBOM to Dependency-Track
- * 
+ *
  * @param projectName - Project name
  * @param version - Project version
  * @param sbom - SBOM in CycloneDX format
@@ -200,7 +180,7 @@ export async function uploadSBOM(
 
   // Encode SBOM as base64
   const sbomJson = JSON.stringify(sbom);
-  const sbomBase64 = Buffer.from(sbomJson).toString("base64");
+  const sbomBase64 = Buffer.from(sbomJson).toString('base64');
 
   const payload = {
     projectName,
@@ -210,18 +190,14 @@ export async function uploadSBOM(
   };
 
   const response = await fetchWithRetry(url, {
-    method: "PUT",
+    method: 'PUT',
     headers: getHeaders(),
     body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
     const body = await response.text();
-    throw new DTClientError(
-      `Failed to upload SBOM: ${response.statusText}`,
-      response.status,
-      body
-    );
+    throw new DTClientError(`Failed to upload SBOM: ${response.statusText}`, response.status, body);
   }
 
   // Wait for project to be created/updated
@@ -230,7 +206,7 @@ export async function uploadSBOM(
 
   const project = await getProject(projectName, version);
   if (!project) {
-    throw new DTClientError("Project not found after SBOM upload");
+    throw new DTClientError('Project not found after SBOM upload');
   }
 
   return project.uuid;
@@ -238,17 +214,15 @@ export async function uploadSBOM(
 
 /**
  * Get components list from a project
- * 
+ *
  * @param projectUuid - Project UUID
  * @returns List of components
  */
-export async function getComponents(
-  projectUuid: string
-): Promise<DTComponent[]> {
+export async function getComponents(projectUuid: string): Promise<DTComponent[]> {
   const url = `${DT_BASE_URL}/api/v1/component/project/${projectUuid}`;
 
   const response = await fetchWithRetry(url, {
-    method: "GET",
+    method: 'GET',
     headers: getHeaders(),
   });
 
@@ -266,7 +240,7 @@ export async function getComponents(
 
 /**
  * Find component UUID by matching group, name, and version
- * 
+ *
  * @param projectUuid - Project UUID
  * @param component - Component to find
  * @returns Component UUID, or null if not found
@@ -279,9 +253,7 @@ export async function findComponentUuid(
 
   const match = components.find(
     (c) =>
-      c.group === component.group &&
-      c.name === component.name &&
-      c.version === component.version
+      c.group === component.group && c.name === component.name && c.version === component.version
   );
 
   return match?.uuid || null;
@@ -289,7 +261,7 @@ export async function findComponentUuid(
 
 /**
  * Set component property
- * 
+ *
  * @param componentUuid - Component UUID
  * @param property - Property to set
  */
@@ -300,7 +272,7 @@ export async function setComponentProperty(
   const url = `${DT_BASE_URL}/api/v1/component/${componentUuid}/property`;
 
   const response = await fetchWithRetry(url, {
-    method: "PUT",
+    method: 'PUT',
     headers: getHeaders(),
     body: JSON.stringify(property),
   });
@@ -317,7 +289,7 @@ export async function setComponentProperty(
 
 /**
  * Set component property by finding component first
- * 
+ *
  * @param projectUuid - Project UUID
  * @param component - Component to set property for
  * @param propertyName - Property name
@@ -333,13 +305,13 @@ export async function setComponentPropertyByComponent(
 
   if (!componentUuid) {
     throw new DTClientError(
-      `Component not found: ${component.group || ""}:${component.name}:${component.version}`
+      `Component not found: ${component.group || ''}:${component.name}:${component.version}`
     );
   }
 
   await setComponentProperty(componentUuid, {
     propertyName,
     propertyValue,
-    propertyType: "STRING",
+    propertyType: 'STRING',
   });
 }

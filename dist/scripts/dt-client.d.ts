@@ -7,7 +7,7 @@
  * - Get components list from a project
  * - Set component properties
  */
-import { SBOM, DTProject, DTComponent, DTComponentProperty, Component } from "./types";
+import { SBOM, DTProject, DTComponent, DTComponentProperty, Component } from './types';
 export declare class DTClientError extends Error {
     statusCode?: number | undefined;
     responseBody?: string | undefined;

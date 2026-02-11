@@ -1,6 +1,6 @@
 /**
  * License Guide Provider
- * 
+ *
  * Provides license-specific guidelines based on YAML configuration.
  * Supports conditional rules based on component context.
  */
@@ -12,7 +12,7 @@ import {
   Guideline,
   LicenseGuidelineConfig,
   GuidelineRule,
-  InputType
+  InputType,
 } from './types';
 
 /**
@@ -22,7 +22,7 @@ const DEFAULT_GUIDELINE: Guideline = {
   condition: 'always',
   message: 'このライセンスのガイドラインが定義されていません。法務担当に相談してください。',
   inputType: 'text',
-  label: '対応内容'
+  label: '対応内容',
 };
 
 /**
@@ -84,9 +84,7 @@ export class LicenseGuideProvider {
     }
 
     // Find license guideline
-    const licenseGuideline = this.config.guidelines.find(
-      (g) => g.license_id === licenseId
-    );
+    const licenseGuideline = this.config.guidelines.find((g) => g.license_id === licenseId);
 
     // If license not found, return default guideline
     if (!licenseGuideline) {
@@ -124,11 +122,17 @@ export class LicenseGuideProvider {
     }
 
     // Handle 'link_type' condition
-    if (trimmedCondition === 'link_type == "static"' || trimmedCondition === "link_type == 'static'") {
+    if (
+      trimmedCondition === 'link_type == "static"' ||
+      trimmedCondition === "link_type == 'static'"
+    ) {
       return context.linkType === 'static';
     }
 
-    if (trimmedCondition === 'link_type == "dynamic"' || trimmedCondition === "link_type == 'dynamic'") {
+    if (
+      trimmedCondition === 'link_type == "dynamic"' ||
+      trimmedCondition === "link_type == 'dynamic'"
+    ) {
       return context.linkType === 'dynamic';
     }
 
@@ -143,14 +147,14 @@ export class LicenseGuideProvider {
 
     // Handle compound conditions with AND (&&)
     if (trimmedCondition.includes('&&')) {
-      const parts = trimmedCondition.split('&&').map(p => p.trim());
-      return parts.every(part => this.evaluateCondition(part, context));
+      const parts = trimmedCondition.split('&&').map((p) => p.trim());
+      return parts.every((part) => this.evaluateCondition(part, context));
     }
 
     // Handle compound conditions with OR (||)
     if (trimmedCondition.includes('||')) {
-      const parts = trimmedCondition.split('||').map(p => p.trim());
-      return parts.some(part => this.evaluateCondition(part, context));
+      const parts = trimmedCondition.split('||').map((p) => p.trim());
+      return parts.some((part) => this.evaluateCondition(part, context));
     }
 
     // Unknown condition - log warning and return false
@@ -167,7 +171,7 @@ export class LicenseGuideProvider {
       message: rule.message,
       inputType: rule.input_type as InputType,
       label: rule.label,
-      options: rule.options
+      options: rule.options,
     };
   }
 
@@ -198,9 +202,7 @@ export class LicenseGuideProvider {
       return null;
     }
 
-    const licenseGuideline = this.config.guidelines.find(
-      (g) => g.license_id === licenseId
-    );
+    const licenseGuideline = this.config.guidelines.find((g) => g.license_id === licenseId);
 
     return licenseGuideline?.common_instructions || null;
   }

@@ -1,6 +1,6 @@
 /**
  * Config Reader Module
- * 
+ *
  * Reads and parses the oss-management-system.yml configuration file
  * from the calling repository root.
  */
@@ -18,12 +18,12 @@ const CONFIG_FILE_NAME = 'oss-management-system.yml';
 enum LogLevel {
   INFO = 'INFO',
   WARN = 'WARN',
-  ERROR = 'ERROR'
+  ERROR = 'ERROR',
 }
 
 /**
  * Log a message with the specified level
- * 
+ *
  * @param level - Log level (INFO, WARN, ERROR)
  * @param message - Message to log
  */
@@ -33,7 +33,7 @@ function log(level: LogLevel, message: string): void {
 
 /**
  * Check if the config file exists in the repository root
- * 
+ *
  * @param repoRoot - Root directory of the calling repository
  * @returns true if file exists, false otherwise
  */
@@ -49,7 +49,7 @@ export function configExists(repoRoot: string): boolean {
 
 /**
  * Read and parse oss-management-system.yml from the calling repository
- * 
+ *
  * @param repoRoot - Root directory of the calling repository
  * @returns ConfigReadResult with success/error information
  */
@@ -62,17 +62,17 @@ export function readConfig(repoRoot: string): ConfigReadResult {
     return {
       success: false,
       error: 'File not found',
-      filePath: configPath
+      filePath: configPath,
     };
   }
 
   try {
     // Read file content
     const fileContent = fs.readFileSync(configPath, 'utf8');
-    
+
     // Parse YAML
     const parsedData = yaml.load(fileContent);
-    
+
     // Validate that parsed data is an object
     if (typeof parsedData !== 'object' || parsedData === null) {
       log(LogLevel.ERROR, `Failed to parse config file: ${configPath}`);
@@ -82,13 +82,13 @@ export function readConfig(repoRoot: string): ConfigReadResult {
       return {
         success: false,
         error: 'Invalid YAML: Expected an object',
-        filePath: configPath
+        filePath: configPath,
       };
     }
 
     // Extract config with proper typing
     const config: OSSManagementConfig = {
-      preProjectVersion: (parsedData as any)['pre-project-version']
+      preProjectVersion: (parsedData as any)['pre-project-version'],
     };
 
     log(LogLevel.INFO, `Config file found: ${configPath}`);
@@ -97,7 +97,7 @@ export function readConfig(repoRoot: string): ConfigReadResult {
     return {
       success: true,
       config,
-      filePath: configPath
+      filePath: configPath,
     };
   } catch (error) {
     // Handle parse errors
@@ -109,10 +109,10 @@ export function readConfig(repoRoot: string): ConfigReadResult {
       return {
         success: false,
         error: `Invalid YAML: ${error.message}`,
-        filePath: configPath
+        filePath: configPath,
       };
     }
-    
+
     // Handle read errors
     if (error instanceof Error) {
       log(LogLevel.ERROR, `Failed to read config file: ${configPath}`);
@@ -120,7 +120,7 @@ export function readConfig(repoRoot: string): ConfigReadResult {
       return {
         success: false,
         error: `Read error: ${error.message}`,
-        filePath: configPath
+        filePath: configPath,
       };
     }
 
@@ -130,7 +130,7 @@ export function readConfig(repoRoot: string): ConfigReadResult {
     return {
       success: false,
       error: 'Unknown error occurred',
-      filePath: configPath
+      filePath: configPath,
     };
   }
 }

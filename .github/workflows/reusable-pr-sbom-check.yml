@@ -54,6 +54,7 @@ jobs:
         run: |
           cd .oss-management
           npm ci
+          npm run lint
           npm run build
       
       - name: Read version config

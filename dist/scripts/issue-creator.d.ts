@@ -10,9 +10,9 @@
  */
 import { ComponentDiff, Guideline, ReviewResult } from './types';
 /**
- * Generate Review Issue Form (YAML)
+ * Generate Review Issue (Markdown)
  */
-export declare function generateReviewIssueForm(version: string, diffs: ComponentDiff[], guidelinesMap: Map<string, Guideline[]>, sbomArtifactUrl: string): string;
+export declare function generateReviewIssueMarkdown(diffs: ComponentDiff[], guidelinesMap: Map<string, Guideline[]>, sbomArtifactUrl: string): string;
 /**
  * Generate Approval Issue (Markdown)
  */

@@ -7,7 +7,7 @@ import {
   generateReviewIssueMarkdown,
   generateApprovalIssue
 } from './issue-creator';
-import { ComponentDiff, Guideline, ReviewResult, Component } from './types';
+import { ComponentDiff, Guideline, ReviewResult } from './types';
 
 describe('Issue Creator', () => {
   describe('generateReviewIssueMarkdown', () => {
@@ -46,7 +46,7 @@ describe('Issue Creator', () => {
       
       const sbomUrl = 'https://example.com/sbom.json';
       
-      const result = generateReviewIssueMarkdown(version, diffs, guidelinesMap, sbomUrl);
+      const result = generateReviewIssueMarkdown(diffs, guidelinesMap, sbomUrl);
       
       // Should contain markdown headers and content
       expect(result).toContain('## 🔍 差分一覧とガイドライン');
@@ -82,7 +82,7 @@ describe('Issue Creator', () => {
       const guidelinesMap = new Map<string, Guideline[]>();
       const sbomUrl = 'https://example.com/sbom.json';
       
-      const result = generateReviewIssueMarkdown(version, diffs, guidelinesMap, sbomUrl);
+      const result = generateReviewIssueMarkdown(diffs, guidelinesMap, sbomUrl);
       
       // Should contain table with components
       expect(result).toContain('new-lib');
@@ -98,7 +98,7 @@ describe('Issue Creator', () => {
       const guidelinesMap = new Map<string, Guideline[]>();
       const sbomUrl = 'https://example.com/sbom.json';
       
-      const result = generateReviewIssueMarkdown(version, diffs, guidelinesMap, sbomUrl);
+      const result = generateReviewIssueMarkdown(diffs, guidelinesMap, sbomUrl);
       
       expect(result).toContain('### ✅ 共通チェック事項');
       expect(result).toContain('- [ ] すべての新規OSSについて、ライセンス種別に誤りがないことを確認した');
@@ -111,7 +111,7 @@ describe('Issue Creator', () => {
       const guidelinesMap = new Map<string, Guideline[]>();
       const sbomUrl = 'https://example.com/sbom.json';
       
-      const result = generateReviewIssueMarkdown(version, diffs, guidelinesMap, sbomUrl);
+      const result = generateReviewIssueMarkdown(diffs, guidelinesMap, sbomUrl);
       
       expect(result).toContain('### 承認依頼');
       expect(result).toContain('- [ ] 管理者に承認を依頼する');
@@ -134,7 +134,7 @@ describe('Issue Creator', () => {
       const guidelinesMap = new Map<string, Guideline[]>();
       const sbomUrl = 'https://example.com/sbom.json';
       
-      const result = generateReviewIssueMarkdown(version, diffs, guidelinesMap, sbomUrl);
+      const result = generateReviewIssueMarkdown(diffs, guidelinesMap, sbomUrl);
       
       expect(result).toContain('no-group-lib');
       expect(result).not.toContain(':no-group-lib');
@@ -157,7 +157,7 @@ describe('Issue Creator', () => {
       const guidelinesMap = new Map<string, Guideline[]>();
       const sbomUrl = 'https://example.com/sbom.json';
       
-      const result = generateReviewIssueMarkdown(version, diffs, guidelinesMap, sbomUrl);
+      const result = generateReviewIssueMarkdown(diffs, guidelinesMap, sbomUrl);
       
       // Pipes should be escaped
       expect(result).toContain('lib\\|with\\|pipes');
@@ -204,7 +204,7 @@ describe('Issue Creator', () => {
       
       const sbomUrl = 'https://example.com/sbom.json';
       
-      const result = generateReviewIssueMarkdown(version, diffs, guidelinesMap, sbomUrl);
+      const result = generateReviewIssueMarkdown(diffs, guidelinesMap, sbomUrl);
       
       // Should have sections for each guideline type
       expect(result).toContain('**Checkbox Label**');

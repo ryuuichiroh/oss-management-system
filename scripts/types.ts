@@ -7,7 +7,7 @@
 // ============================================================================
 
 export interface SBOM {
-  bomFormat: "CycloneDX";
+  bomFormat: 'CycloneDX';
   specVersion: string;
   serialNumber?: string;
   version?: number;
@@ -28,7 +28,7 @@ export interface Tool {
 }
 
 export interface Component {
-  type: "library" | "application" | "framework" | "container" | "file";
+  type: 'library' | 'application' | 'framework' | 'container' | 'file';
   group?: string;
   name: string;
   version: string;
@@ -55,7 +55,7 @@ export interface Hash {
 // Diff Types
 // ============================================================================
 
-export type ChangeType = "added" | "updated" | "removed";
+export type ChangeType = 'added' | 'updated' | 'removed';
 
 export interface ComponentDiff {
   changeType: ChangeType;
@@ -78,11 +78,11 @@ export interface DiffResult {
 
 export interface ComponentContext {
   isModified?: boolean;
-  linkType?: "static" | "dynamic";
+  linkType?: 'static' | 'dynamic';
   isDistributed?: boolean;
 }
 
-export type InputType = "checkbox" | "text" | "select";
+export type InputType = 'checkbox' | 'text' | 'select';
 
 export interface Guideline {
   condition: string;
@@ -159,7 +159,7 @@ export interface DTComponentProperty {
   groupName?: string;
   propertyName: string;
   propertyValue: string;
-  propertyType?: "STRING" | "INTEGER" | "BOOLEAN" | "NUMBER";
+  propertyType?: 'STRING' | 'INTEGER' | 'BOOLEAN' | 'NUMBER';
 }
 
 // ============================================================================

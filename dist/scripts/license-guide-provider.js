@@ -50,7 +50,7 @@ const DEFAULT_GUIDELINE = {
     condition: 'always',
     message: 'このライセンスのガイドラインが定義されていません。法務担当に相談してください。',
     inputType: 'text',
-    label: '対応内容'
+    label: '対応内容',
 };
 /**
  * License Guide Provider class
@@ -130,10 +130,12 @@ class LicenseGuideProvider {
             return context.isModified === false;
         }
         // Handle 'link_type' condition
-        if (trimmedCondition === 'link_type == "static"' || trimmedCondition === "link_type == 'static'") {
+        if (trimmedCondition === 'link_type == "static"' ||
+            trimmedCondition === "link_type == 'static'") {
             return context.linkType === 'static';
         }
-        if (trimmedCondition === 'link_type == "dynamic"' || trimmedCondition === "link_type == 'dynamic'") {
+        if (trimmedCondition === 'link_type == "dynamic"' ||
+            trimmedCondition === "link_type == 'dynamic'") {
             return context.linkType === 'dynamic';
         }
         // Handle 'is_distributed' condition
@@ -145,13 +147,13 @@ class LicenseGuideProvider {
         }
         // Handle compound conditions with AND (&&)
         if (trimmedCondition.includes('&&')) {
-            const parts = trimmedCondition.split('&&').map(p => p.trim());
-            return parts.every(part => this.evaluateCondition(part, context));
+            const parts = trimmedCondition.split('&&').map((p) => p.trim());
+            return parts.every((part) => this.evaluateCondition(part, context));
         }
         // Handle compound conditions with OR (||)
         if (trimmedCondition.includes('||')) {
-            const parts = trimmedCondition.split('||').map(p => p.trim());
-            return parts.some(part => this.evaluateCondition(part, context));
+            const parts = trimmedCondition.split('||').map((p) => p.trim());
+            return parts.some((part) => this.evaluateCondition(part, context));
         }
         // Unknown condition - log warning and return false
         console.warn(`Unknown condition: ${condition}`);
@@ -166,7 +168,7 @@ class LicenseGuideProvider {
             message: rule.message,
             inputType: rule.input_type,
             label: rule.label,
-            options: rule.options
+            options: rule.options,
         };
     }
     /**

@@ -74,7 +74,7 @@ function compareSBOMs(currentSbom, previousSbom) {
             // Component exists in current but not in previous -> added
             diffs.push({
                 changeType: 'added',
-                component: currentComponent
+                component: currentComponent,
             });
         }
         else if (previousComponent.version !== currentComponent.version) {
@@ -82,7 +82,7 @@ function compareSBOMs(currentSbom, previousSbom) {
             diffs.push({
                 changeType: 'updated',
                 component: currentComponent,
-                previousVersion: previousComponent.version
+                previousVersion: previousComponent.version,
             });
         }
         // If versions match, no diff
@@ -92,7 +92,7 @@ function compareSBOMs(currentSbom, previousSbom) {
         if (!processedKeys.has(key)) {
             diffs.push({
                 changeType: 'removed',
-                component: previousComponent
+                component: previousComponent,
             });
         }
     }
@@ -137,17 +137,17 @@ async function main() {
             comparisonInfo: {
                 currentVersion: currentSbom.version?.toString() || 'unknown',
                 previousVersion: previousSbom.version?.toString() || 'unknown',
-                comparedAt: new Date().toISOString()
+                comparedAt: new Date().toISOString(),
             },
-            diffs
+            diffs,
         };
         // Output result
         const resultJson = JSON.stringify(result, null, 2);
         fs.writeFileSync(outputPath, resultJson, 'utf-8');
         console.log(`Diff check complete. Found ${diffs.length} differences.`);
-        console.log(`- Added: ${diffs.filter(d => d.changeType === 'added').length}`);
-        console.log(`- Updated: ${diffs.filter(d => d.changeType === 'updated').length}`);
-        console.log(`- Removed: ${diffs.filter(d => d.changeType === 'removed').length}`);
+        console.log(`- Added: ${diffs.filter((d) => d.changeType === 'added').length}`);
+        console.log(`- Updated: ${diffs.filter((d) => d.changeType === 'updated').length}`);
+        console.log(`- Removed: ${diffs.filter((d) => d.changeType === 'removed').length}`);
         console.log(`Result written to: ${outputPath}`);
     }
     catch (error) {
